@@ -6,6 +6,8 @@ import org.scalatest.junit._
 import org.scalatest.mock.MockitoSugar
 import org.mockito.Mockito._
 import com.typesafe.config.ConfigFactory
+import com.typesafe.config.ConfigException
+import com.nummulus.amqp.driver.configuration.ConfigurationException
 
 @RunWith(classOf[JUnitRunner])
 class DefaultDriverTest extends FlatSpec with Matchers with MockitoSugar with OneInstancePerTest {
@@ -21,6 +23,22 @@ class DefaultDriverTest extends FlatSpec with Matchers with MockitoSugar with On
   it should "set the broker host when creating a consumer" in {
     driver.newConsumer("TestService", "testOperation")
     verify (factory).setHost("localhost")
+  }
+  
+  it should "throw an exception if the service doesn't exist" in {
+    val exception = intercept[ConfigurationException] {
+      driver.newConsumer("NonExistingService", "testOperation")
+    }
+    
+    exception.getMessage should be ("No configuration setting found for key 'uses.NonExistingService'")
+  }
+  
+  it should "throw an exception if the operation doesn't exist for a valid service" in {
+    val exception = intercept[ConfigurationException] {
+      driver.newConsumer("TestService", "nonExistingTestOperation")
+    }
+    
+    exception.getMessage should be ("No configuration setting found for key 'nonExistingTestOperation'")
   }
   
   // Test fixture
