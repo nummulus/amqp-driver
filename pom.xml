@@ -19,6 +19,10 @@
 		<encoding>UTF-8</encoding>
 	</properties>
 
+	<modules>
+		<module>amqp-driver</module>
+	</modules>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.scala-lang</groupId>
