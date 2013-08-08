@@ -25,6 +25,11 @@ class DefaultDriverTest extends FlatSpec with Matchers with MockitoSugar with On
     verify (factory).setHost("localhost")
   }
   
+  it should "create a channel when creating a consumer" in {
+    driver.newConsumer("TestService", "testOperation")
+    verify (connection).createChannel
+  }
+  
   it should "throw an exception if the service doesn't exist" in {
     val exception = intercept[ConfigurationException] {
       driver.newConsumer("NonExistingService", "testOperation")
