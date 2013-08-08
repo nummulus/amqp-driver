@@ -1,0 +1,95 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.nummulus.amqp.driver</groupId>
+	<artifactId>amqp-parent</artifactId>
+	<version>0.1.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
+
+	<name>AMQP Driver - Parent POM</name>
+
+	<properties>
+		<!-- Scala -->
+		<scala.version>2.10</scala.version>
+		<scala-maven-plugin.version>3.1.2</scala-maven-plugin.version>
+
+		<!-- Maven -->
+		<maven.compiler.source>1.6</maven.compiler.source>
+		<maven.compiler.target>1.6</maven.compiler.target>
+		<encoding>UTF-8</encoding>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.scala-lang</groupId>
+			<artifactId>scala-library</artifactId>
+			<version>2.10.0</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<sourceDirectory>src/main/scala</sourceDirectory>
+		<testSourceDirectory>src/test/scala</testSourceDirectory>
+		<plugins>
+			<plugin>
+				<!-- http://davidb.github.com/scala-maven-plugin -->
+				<groupId>net.alchim31.maven</groupId>
+				<artifactId>scala-maven-plugin</artifactId>
+				<version>${scala-maven-plugin.version}</version>
+				<executions>
+					<execution>
+						<id>scala-compile-first</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>add-source</goal>
+							<goal>compile</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>scala-test-compile</id>
+						<phase>process-test-resources</phase>
+						<goals>
+							<goal>testCompile</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<recompileMode>incremental</recompileMode>
+					<args>
+						<arg>-optimise</arg>
+						<arg>-unchecked</arg>
+						<arg>-deprecation</arg>
+					</args>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-site-plugin</artifactId>
+				<version>3.2</version>
+				<configuration>
+					<reportPlugins>
+						<plugin>
+							<artifactId>maven-project-info-reports-plugin</artifactId>
+							<version>2.2</version>
+						</plugin>
+						<plugin>
+							<groupId>net.alchim31.maven</groupId>
+							<artifactId>scala-maven-plugin</artifactId>
+							<version>${scala-maven-plugin.version}</version>
+							<configuration>
+								<jvmArgs>
+									<jvmArg>-Xms64m</jvmArg>
+									<jvmArg>-Xmx1024m</jvmArg>
+								</jvmArgs>
+							</configuration>
+						</plugin>
+					</reportPlugins>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<prerequisites>
+		<maven>3.0.4</maven>
+	</prerequisites>
+</project>

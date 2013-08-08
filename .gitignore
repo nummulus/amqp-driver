@@ -1,0 +1,16 @@
+# Eclipse files
+.metadata/
+.classpath
+.project
+.settings/
+target/
+.cache
+
+# Scala IDE files
+.worksheet
+*.sc
+
+# OS specific files
+.DS_Store
+desktop.ini
+Thumbs.db
