@@ -35,7 +35,7 @@ private[driver] class DefaultDriver(connectionFactory: ConnectionFactory, config
     val queueConfiguration = getQueueConfiguration(service, operation)
     
     val channel = connection.createChannel()
-    null
+    new DefaultConsumer(channel, queueConfiguration)
   }
   
   /**
