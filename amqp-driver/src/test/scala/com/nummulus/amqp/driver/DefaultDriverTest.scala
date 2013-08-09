@@ -50,9 +50,13 @@ class DefaultDriverTest extends FlatSpec with Matchers with MockitoSugar with On
   val factory = mock[ConnectionFactory]
   val connection = mock[Connection]
   val channel = mock[Channel]
+  val declareOk = mock[QueueDeclareOk]
   
   when (factory.newConnection) thenReturn connection
   when (connection.createChannel) thenReturn channel
+  when (channel.queueDeclare) thenReturn declareOk
+  when (channel.queueDeclare("TestService.TestOperation", true, false, false, null)) thenReturn declareOk
+  when (declareOk.getQueue) thenReturn "generated-queue-name"
   
   val driver = new DefaultDriver(factory, ConfigFactory.load("test"))
 }

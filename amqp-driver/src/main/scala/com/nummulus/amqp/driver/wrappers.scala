@@ -1,5 +1,7 @@
 package com.nummulus.amqp.driver
 
+import com.rabbitmq.client.AMQP.Queue.DeclareOk
+
 import com.rabbitmq.client.{Channel => RabbitChannel}
 import com.rabbitmq.client.{Connection => RabbitConnection}
 import com.rabbitmq.client.{ConnectionFactory => RabbitConnectionFactory}
@@ -21,4 +23,16 @@ private[driver] class Connection(connection: RabbitConnection) {
   def close { connection.close() }
 }
 
-private[driver] class Channel(channel: RabbitChannel)
+private[driver] class Channel(channel: RabbitChannel) {
+  def queueDeclare(): QueueDeclareOk = new QueueDeclareOk(channel.queueDeclare)
+  
+  def queueDeclare(queue: String, durable: Boolean, exclusive: Boolean, autoDelete: Boolean, arguments: Map[String, Object]): QueueDeclareOk = {
+    import scala.collection.JavaConversions._
+    
+    new QueueDeclareOk(channel.queueDeclare(queue, durable, exclusive, autoDelete, arguments))
+  }
+}
+
+private[driver] class QueueDeclareOk(declareOk: DeclareOk) {
+  def getQueue: String = declareOk.getQueue
+}
