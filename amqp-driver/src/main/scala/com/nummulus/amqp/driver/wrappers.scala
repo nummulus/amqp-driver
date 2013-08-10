@@ -9,7 +9,7 @@ import com.rabbitmq.client.{ConnectionFactory => RabbitConnectionFactory}
 /**
  * Wrapper classes around RabbitMQ client classes to ease testing.
  */
-private[driver] class ConnectionFactory(factory: RabbitConnectionFactory) {
+class ConnectionFactory(factory: RabbitConnectionFactory) {
   def setHost(host: String) {
     factory.setHost(host)
   }
@@ -17,13 +17,13 @@ private[driver] class ConnectionFactory(factory: RabbitConnectionFactory) {
   def newConnection(): Connection = new Connection(factory.newConnection())
 }
 
-private[driver] class Connection(connection: RabbitConnection) {
+class Connection(connection: RabbitConnection) {
   def createChannel(): Channel = new Channel(connection.createChannel)
   
   def close { connection.close() }
 }
 
-private[driver] class Channel(channel: RabbitChannel) {
+class Channel(channel: RabbitChannel) {
   def queueDeclare(): QueueDeclareOk = new QueueDeclareOk(channel.queueDeclare)
   
   def queueDeclare(queue: String, durable: Boolean, exclusive: Boolean, autoDelete: Boolean, arguments: Map[String, Object]): QueueDeclareOk = {
@@ -33,6 +33,6 @@ private[driver] class Channel(channel: RabbitChannel) {
   }
 }
 
-private[driver] class QueueDeclareOk(declareOk: DeclareOk) {
+class QueueDeclareOk(declareOk: DeclareOk) {
   def getQueue: String = declareOk.getQueue
 }
