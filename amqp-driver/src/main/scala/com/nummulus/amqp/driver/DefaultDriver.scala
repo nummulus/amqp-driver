@@ -4,6 +4,7 @@ import org.slf4j.LoggerFactory
 
 import com.nummulus.amqp.driver.configuration.ConfigurationException
 import com.nummulus.amqp.driver.configuration.QueueConfiguration
+import com.nummulus.amqp.driver.consumer.MessageConsumer
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigException
 
@@ -35,7 +36,7 @@ private[driver] class DefaultDriver(connectionFactory: ConnectionFactory, config
     val queueConfiguration = getQueueConfiguration(service, operation)
     
     val channel = connection.createChannel()
-    new DefaultConsumer(channel, queueConfiguration)
+    new DefaultConsumer(channel, queueConfiguration, MessageConsumer.newBlocking(channel))
   }
   
   /**

@@ -3,11 +3,12 @@ package com.nummulus.amqp.driver
 import org.slf4j.LoggerFactory
 
 import com.nummulus.amqp.driver.configuration.QueueConfiguration
+import com.nummulus.amqp.driver.consumer.MessageConsumer
 
 /**
  * Default consumer implementation.
  */
-private[driver] class DefaultConsumer(channel: Channel, configuration: QueueConfiguration) extends AmqpConsumer {
+private[driver] class DefaultConsumer(channel: Channel, configuration: QueueConfiguration, callback: => MessageConsumer) extends AmqpConsumer {
   private val logger = LoggerFactory.getLogger(getClass)
   
   private val responseQueue = channel.queueDeclare.getQueue
@@ -15,4 +16,6 @@ private[driver] class DefaultConsumer(channel: Channel, configuration: QueueConf
   
   private val requestQueue = channel.queueDeclare(configuration.queue, configuration.durable, configuration.exclusive, configuration.autoDelete, null)
   logger.debug("Declared request queue: {}", requestQueue.getQueue)
+  
+  channel.basicConsume(responseQueue, configuration.autoAcknowledge, callback)
 }

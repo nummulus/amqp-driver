@@ -1,7 +1,7 @@
 package com.nummulus.amqp.driver
 
+import com.nummulus.amqp.driver.consumer.MessageConsumer
 import com.rabbitmq.client.AMQP.Queue.DeclareOk
-
 import com.rabbitmq.client.{Channel => RabbitChannel}
 import com.rabbitmq.client.{Connection => RabbitConnection}
 import com.rabbitmq.client.{ConnectionFactory => RabbitConnectionFactory}
@@ -31,6 +31,12 @@ class Channel(channel: RabbitChannel) {
     
     new QueueDeclareOk(channel.queueDeclare(queue, durable, exclusive, autoDelete, arguments))
   }
+  
+  def basicConsume(queue: String, autoAcknowledge: Boolean, callback: MessageConsumer) {
+    channel.basicConsume(queue, autoAcknowledge, callback.get)
+  }
+  
+  private[driver] def get: RabbitChannel = channel
 }
 
 class QueueDeclareOk(declareOk: DeclareOk) {
