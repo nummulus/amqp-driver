@@ -10,5 +10,7 @@ import com.rabbitmq.client.QueueingConsumer
  * Just a wrapper around [[com.rabbitmq.client.QueueingConsumer]].
  */
 class BlockingMessageConsumer(channel: Channel) extends MessageConsumer {
-  override def get: RabbitConsumer = new QueueingConsumer(channel.get)
+  private lazy val consumer = new QueueingConsumer(channel.get)
+  
+  override private[driver] def get: RabbitConsumer = consumer
 }

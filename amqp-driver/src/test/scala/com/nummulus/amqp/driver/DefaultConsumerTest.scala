@@ -9,6 +9,7 @@ import com.typesafe.config.ConfigFactory
 import com.nummulus.amqp.driver.configuration.QueueConfiguration
 import com.nummulus.amqp.driver.consumer.MessageConsumer
 import com.nummulus.amqp.driver.consumer.BlockingMessageConsumer
+import org.mockito.ArgumentCaptor
 
 @RunWith(classOf[JUnitRunner])
 class DefaultConsumerTest extends FlatSpec with Matchers with MockitoSugar with OneInstancePerTest {
@@ -26,6 +27,24 @@ class DefaultConsumerTest extends FlatSpec with Matchers with MockitoSugar with 
     verify (channel).basicConsume("generated-queue-name", true, messageConsumer)
   }
   
+  it should "publish a message when calling ask" in {
+    consumer.ask("Cheese")
+    
+    val exchangeCaptor = ArgumentCaptor.forClass(classOf[String])
+    val routingKeyCaptor = ArgumentCaptor.forClass(classOf[String])
+    val propsCaptor = ArgumentCaptor.forClass(classOf[MessageProperties])
+    val messageCaptor = ArgumentCaptor.forClass(classOf[Array[Byte]])
+    verify (channel).basicPublish(exchangeCaptor.capture(), routingKeyCaptor.capture(), propsCaptor.capture(), messageCaptor.capture())
+    
+    exchangeCaptor.getValue should be ("")
+    routingKeyCaptor.getValue should be ("requestQueue")
+    messageCaptor.getValue should be ("Cheese".getBytes)
+    
+    val props = propsCaptor.getValue
+    props should have ('replyTo ("generated-queue-name"))
+    props.correlationId should (fullyMatch regex(uuidPattern))
+  }
+  
   // Test fixture
   val channel = mock[Channel]
   val declareOk = mock[QueueDeclareOk]
@@ -38,4 +57,6 @@ class DefaultConsumerTest extends FlatSpec with Matchers with MockitoSugar with 
   val queueConfiguration = QueueConfiguration("requestQueue", true, false, false, true)
   
   val consumer = new DefaultConsumer(channel, queueConfiguration, messageConsumer)
+  
+  val uuidPattern = "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
 }
