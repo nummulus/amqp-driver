@@ -22,7 +22,7 @@ class ConnectionFactory(factory: RabbitConnectionFactory) {
 class Connection(connection: RabbitConnection) {
   def createChannel(): Channel = new Channel(connection.createChannel)
   
-  def close { connection.close() }
+  def close() { connection.close() }
 }
 
 class Channel(channel: RabbitChannel) {
