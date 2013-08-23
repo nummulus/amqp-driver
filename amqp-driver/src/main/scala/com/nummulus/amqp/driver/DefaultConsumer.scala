@@ -57,10 +57,11 @@ private[driver] class DefaultConsumer(channel: Channel, configuration: QueueConf
     val delivery = callback.nextDelivery
     if (delivery.properties.correlationId == correlationId) {
       logger.debug("Response received")
-      return new String(delivery.body)
+      new String(delivery.body)
     }
-    
-    logger.debug("Received response with wrong correlationId")
-    waitForDelivery(correlationId)
+    else {
+      logger.debug("Received response with wrong correlationId")
+      waitForDelivery(correlationId)
+    }
   }
 }
