@@ -39,12 +39,12 @@ class Channel(channel: RabbitChannel) {
   }
   
   def basicPublish(exchange: String, routingKey: String, properties: MessageProperties, body: Array[Byte]) {
-    import scala.collection.JavaConverters._
+    import scala.collection.JavaConversions._
     
     val props = new BasicProperties().builder
       .contentType(properties.contentType)
       .contentEncoding(properties.contentEncoding)
-      .headers(properties.headers.asJava)
+      .headers(properties.headers)
       .deliveryMode(properties.deliveryMode)
       .priority(properties.priority)
       .correlationId(properties.correlationId)
