@@ -39,11 +39,11 @@ class DefaultDriverTest extends FlatSpec with Matchers with MockitoSugar with On
   }
   
   it should "throw an exception if the operation doesn't exist for a valid service" in {
-    val exception = intercept[ConfigurationException] {
+    val thrown = intercept[ConfigurationException] {
       driver.newConsumer("TestService", "nonExistingTestOperation")
     }
     
-    exception.getMessage should be ("No configuration setting found for key 'nonExistingTestOperation'")
+    thrown.getMessage should be ("No configuration setting found for key 'nonExistingTestOperation'")
   }
   
   // Test fixture

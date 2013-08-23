@@ -31,18 +31,19 @@ class DefaultConsumerTest extends FlatSpec with Matchers with MockitoSugar with 
     verify (channel).queueDeclare("requestQueue", true, false, false, null)
   }
   
-  it should "tie a consumer to the response queue" in {
+  it should "tie a consumer to the response queue at construction time" in {
     verify (channel).basicConsume("generated-queue-name", true, messageConsumer)
   }
   
   it should "publish a message when calling ask" in {
-    val consumerWithDefaultCorrelationIdGenerator = new DefaultConsumer(channel, queueConfiguration, messageConsumer)
-    consumerWithDefaultCorrelationIdGenerator.ask("Cheese")
-    
     val exchangeCaptor = ArgumentCaptor.forClass(classOf[String])
     val routingKeyCaptor = ArgumentCaptor.forClass(classOf[String])
     val propsCaptor = ArgumentCaptor.forClass(classOf[MessageProperties])
     val messageCaptor = ArgumentCaptor.forClass(classOf[Array[Byte]])
+    val consumerWithDefaultCorrelationIdGenerator = new DefaultConsumer(channel, queueConfiguration, messageConsumer)
+    
+    consumerWithDefaultCorrelationIdGenerator.ask("Cheese")
+    
     verify (channel).basicPublish(exchangeCaptor.capture(), routingKeyCaptor.capture(), propsCaptor.capture(), messageCaptor.capture())
     
     exchangeCaptor.getValue should be ("")
@@ -50,17 +51,17 @@ class DefaultConsumerTest extends FlatSpec with Matchers with MockitoSugar with 
     messageCaptor.getValue should be ("Cheese".getBytes)
     
     val props = propsCaptor.getValue
-    props should have ('replyTo ("generated-queue-name"))
+    props.replyTo should be ("generated-queue-name")
     props.correlationId should (fullyMatch regex(uuidPattern))
   }
   
   it should "publish a message and receive a response" in {
     val properties = MessageProperties(correlationId = "4")
-    when (messageConsumer.nextDelivery) thenReturn Delivery(properties, "Grommit".getBytes)
+    when (messageConsumer.nextDelivery) thenReturn Delivery(properties, "Gromit".getBytes)
     
     val response = consumer.ask("Cheese")
     whenReady (response) { r =>
-      r should be ("Grommit")
+      r should be ("Gromit")
     }
   }
   
@@ -68,7 +69,7 @@ class DefaultConsumerTest extends FlatSpec with Matchers with MockitoSugar with 
     implicit val patienceConfig = PatienceConfig(timeout = Span(100, Millis), interval = Span(5, Millis))
     
     val properties = MessageProperties(correlationId = "wrong-id")
-    when (messageConsumer.nextDelivery) thenReturn Delivery(properties, "Grommit".getBytes)
+    when (messageConsumer.nextDelivery) thenReturn Delivery(properties, "Gromit".getBytes)
     
     val response = consumer.ask("Cheese")
     val thrown = intercept[TestFailedException] {
