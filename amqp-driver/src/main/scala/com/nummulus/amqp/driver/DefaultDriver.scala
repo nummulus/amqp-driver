@@ -29,7 +29,7 @@ private[driver] class DefaultDriver(connectionFactory: ConnectionFactory, config
    * @param service owner of the operation
    * @param operation operation name of the operation to invoke
    * @return new consumer
-   * @throws QueueConfiguration if the queue has missing keys in the configuration
+   * @throws QueueConfiguration if the queue has missing keys in the configuration file
    */
   override def newConsumer(service: String, operation: String): AmqpConsumer = {
     logger.info(s"Retrieving configuration for operation '$operation' on service '$service'")
@@ -54,7 +54,7 @@ private[driver] class DefaultDriver(connectionFactory: ConnectionFactory, config
    * Returns the configuration of the request queue for the specified service
    * operation.
    * 
-   * @throws QueueConfiguration if the queue has missing keys in the configuration
+   * @throws QueueConfiguration if the queue has missing keys in the configuration file
    */
   private def getQueueConfiguration(service: String, operation: String): QueueConfiguration = {
     try {
