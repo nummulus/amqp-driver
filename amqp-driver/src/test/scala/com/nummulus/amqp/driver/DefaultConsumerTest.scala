@@ -18,24 +18,25 @@ import com.nummulus.amqp.driver.consumer.MessageConsumer
 import com.nummulus.amqp.driver.consumer.BlockingMessageConsumer
 import com.nummulus.amqp.driver.consumer.Delivery
 import com.nummulus.amqp.driver.consumer.CorrelationIdGenerator
+import com.nummulus.amqp.driver.fixture.ConsumerFixture
 
 @RunWith(classOf[JUnitRunner])
-class DefaultConsumerTest extends FlatSpec with Matchers with MockitoSugar with OneInstancePerTest with ScalaFutures with OptionValues {
+class DefaultConsumerTest extends FlatSpec with Matchers with MockitoSugar with ScalaFutures with OptionValues {
   behavior of "DefaultConsumer"
   
-  it should "declare a response queue at construction time" in {
+  it should "declare a response queue at construction time" in new ConsumerFixture {
     verify (channel).queueDeclare
   }
   
-  it should "declare a request queue at construction time" in {
+  it should "declare a request queue at construction time" in new ConsumerFixture {
     verify (channel).queueDeclare("requestQueue", true, false, false, null)
   }
   
-  it should "tie a consumer to the response queue at construction time" in {
+  it should "tie a consumer to the response queue at construction time" in new ConsumerFixture {
     verify (channel).basicConsume("generated-queue-name", true, messageConsumer)
   }
   
-  it should "publish a message when calling ask" in {
+  it should "publish a message when calling ask" in new ConsumerFixture {
     val exchangeCaptor = ArgumentCaptor.forClass(classOf[String])
     val routingKeyCaptor = ArgumentCaptor.forClass(classOf[String])
     val propsCaptor = ArgumentCaptor.forClass(classOf[MessageProperties])
@@ -55,7 +56,7 @@ class DefaultConsumerTest extends FlatSpec with Matchers with MockitoSugar with 
     props.correlationId should (fullyMatch regex(uuidPattern))
   }
   
-  it should "publish a message and receive a response" in {
+  it should "publish a message and receive a response" in new ConsumerFixture {
     val properties = MessageProperties(correlationId = "4")
     when (messageConsumer.nextDelivery) thenReturn Delivery(properties, "Gromit".getBytes)
     
@@ -65,7 +66,7 @@ class DefaultConsumerTest extends FlatSpec with Matchers with MockitoSugar with 
     }
   }
   
-  it should "discard messages with the wrong correlationId" in {
+  it should "discard messages with the wrong correlationId" in new ConsumerFixture {
     implicit val patienceConfig = PatienceConfig(timeout = Span(100, Millis), interval = Span(5, Millis))
     
     val properties = MessageProperties(correlationId = "wrong-id")
@@ -82,19 +83,5 @@ class DefaultConsumerTest extends FlatSpec with Matchers with MockitoSugar with 
   }
   
   // Test fixture
-  val channel = mock[Channel]
-  val declareOk = mock[QueueDeclareOk]
-  val messageConsumer = mock[BlockingMessageConsumer]
-  val correlationIdGenerator = mock[CorrelationIdGenerator]
-  
-  when (channel.queueDeclare) thenReturn declareOk
-  when (channel.queueDeclare("requestQueue", true, false, false, null)) thenReturn declareOk
-  when (declareOk.getQueue) thenReturn "generated-queue-name"
-  when (correlationIdGenerator.generate) thenReturn "4"
-  
-  val queueConfiguration = QueueConfiguration("requestQueue", true, false, false, true)
-  
-  val consumer = new DefaultConsumer(channel, queueConfiguration, messageConsumer, correlationIdGenerator)
-  
   val uuidPattern = "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
 }
