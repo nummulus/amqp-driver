@@ -11,4 +11,9 @@ trait AmqpConsumer {
    * holding the eventual response.
    */
   def ask(message: String): Future[String]
+  
+  /**
+   * Sends a message without waiting for a response, fire-and-forget semantics.
+   */
+  def tell(message: String)
 }

@@ -46,6 +46,14 @@ private[driver] class DefaultConsumer(channel: Channel, configuration: QueueConf
   }
   
   /**
+   * Sends a message without waiting for a response, fire-and-forget semantics.
+   */
+  override def tell(message: String) {
+    logger.debug("Sending message to fire-and-forget queue: {}", message)
+    channel.basicPublish("", configuration.queue, null, message.getBytes)
+  }
+  
+  /**
    * Returns the response message belonging to a request with the specified
    * correlationId.
    * 
