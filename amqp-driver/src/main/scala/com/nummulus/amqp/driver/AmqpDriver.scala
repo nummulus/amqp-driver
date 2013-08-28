@@ -12,4 +12,12 @@ trait AmqpDriver {
    * @return new consumer
    */
   def newConsumer(service: String, operation: String): AmqpConsumer
+  
+  /**
+   * Returns a new provider for a services' operation.
+   * 
+   * @param operation name of the operation to provide
+   * @return new provider
+   */
+  def newProvider(operation: String): AmqpProvider
 }

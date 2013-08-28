@@ -46,6 +46,31 @@ class DefaultDriverTest extends FlatSpec with Matchers with MockitoSugar with On
     thrown.getMessage should be ("No configuration setting found for key 'nonExistingTestOperation'")
   }
   
+  it should "connect to the broker after creating a provider" in {
+    verify (factory, never).newConnection
+    
+    driver.newProvider("parseFile")
+    verify (factory, times(1)).newConnection
+  }
+  
+  it should "set the broker host when creating a provider" in {
+    driver.newProvider("parseFile")
+    verify (factory).setHost("localhost")
+  }
+  
+  it should "create a channel when creating a provider" in {
+    driver.newProvider("parseFile")
+    verify (connection).createChannel
+  }
+  
+  it should "throw an exception if the operation doesn't exist when creating a provider" in {
+    val exception = intercept[ConfigurationException] {
+      driver.newProvider("nonExistingOperation")
+    }
+    
+    exception.getMessage should be ("No configuration setting found for key 'nonExistingOperation'")
+  }
+  
   // Test fixture
   val factory = mock[ConnectionFactory]
   val connection = mock[Connection]
@@ -56,6 +81,7 @@ class DefaultDriverTest extends FlatSpec with Matchers with MockitoSugar with On
   when (connection.createChannel) thenReturn channel
   when (channel.queueDeclare) thenReturn declareOk
   when (channel.queueDeclare("TestService.TestOperation", true, false, false, null)) thenReturn declareOk
+  when (channel.queueDeclare("Importeur.ParseFile", true, false, false, null)) thenReturn declareOk
   when (declareOk.getQueue) thenReturn "generated-queue-name"
   
   val driver = new DefaultDriver(factory, ConfigFactory.load("test"))
