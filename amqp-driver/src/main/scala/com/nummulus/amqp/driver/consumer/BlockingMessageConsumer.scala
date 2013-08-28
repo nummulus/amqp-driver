@@ -1,9 +1,10 @@
 package com.nummulus.amqp.driver.consumer
 
 import com.nummulus.amqp.driver.Channel
+import com.nummulus.amqp.driver.MessageProperties
+
 import com.rabbitmq.client.{Consumer => RabbitConsumer}
 import com.rabbitmq.client.QueueingConsumer
-import com.nummulus.amqp.driver.MessageProperties
 
 /**
  * Blocking message consumer.

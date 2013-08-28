@@ -6,8 +6,6 @@ import com.nummulus.amqp.driver.configuration.QueueConfiguration
 import com.nummulus.amqp.driver.consumer.MessageConsumer
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigException
-import com.nummulus.amqp.driver.configuration.QueueConfiguration
-import com.nummulus.amqp.driver.configuration.QueueConfiguration
 
 /**
  * Default driver implementation.
