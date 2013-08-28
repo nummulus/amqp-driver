@@ -30,7 +30,7 @@ class DefaultDriverTest extends FlatSpec with Matchers with MockitoSugar with On
     verify (connection).createChannel
   }
   
-  it should "throw an exception if the service doesn't exist" in {
+  it should "throw an exception if the service doesn't exist when creating a consumer" in {
     val exception = intercept[ConfigurationException] {
       driver.newConsumer("NonExistingService", "testOperation")
     }
@@ -38,7 +38,7 @@ class DefaultDriverTest extends FlatSpec with Matchers with MockitoSugar with On
     exception.getMessage should be ("No configuration setting found for key 'uses.NonExistingService'")
   }
   
-  it should "throw an exception if the operation doesn't exist for a valid service" in {
+  it should "throw an exception if the operation doesn't exist for a valid service when creating a consumer" in {
     val thrown = intercept[ConfigurationException] {
       driver.newConsumer("TestService", "nonExistingTestOperation")
     }
