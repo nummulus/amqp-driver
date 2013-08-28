@@ -13,4 +13,8 @@ class DefaultProviderTest extends FlatSpec with Matchers {
   it should "declare a request queue at construction time" in new ProviderFixture {
     verify (channel).queueDeclare("requestQueue", true, false, false, null)
   }
+  
+  it should "set the QOS to one" in new ProviderFixture {
+    verify (channel).basicQos(1)
+  }
 }

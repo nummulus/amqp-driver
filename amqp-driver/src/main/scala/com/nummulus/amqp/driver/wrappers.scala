@@ -59,6 +59,10 @@ class Channel(channel: RabbitChannel) {
     channel.basicPublish(exchange, routingKey, props, body)
   }
   
+  def basicQos(prefetchCount: Int) {
+    channel.basicQos(prefetchCount)
+  }
+  
   private[driver] def get: RabbitChannel = channel
 }
 

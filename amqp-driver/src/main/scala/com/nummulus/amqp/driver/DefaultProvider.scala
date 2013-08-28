@@ -11,4 +11,6 @@ private[driver] class DefaultProvider(channel: Channel, configuration: QueueConf
   
   private val requestQueue = channel.queueDeclare(configuration.queue, configuration.durable, configuration.exclusive, configuration.autoDelete, null)
   logger.debug("Declared request queue: {}", requestQueue.getQueue)
+  
+  channel.basicQos(1)
 }
