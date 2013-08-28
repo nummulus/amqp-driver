@@ -3,7 +3,6 @@ package com.nummulus.amqp.driver
 import org.slf4j.LoggerFactory
 import com.nummulus.amqp.driver.configuration.ConfigurationException
 import com.nummulus.amqp.driver.configuration.QueueConfiguration
-import com.nummulus.amqp.driver.consumer.MessageConsumer
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigException
 

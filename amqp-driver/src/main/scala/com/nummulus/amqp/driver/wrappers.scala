@@ -1,6 +1,5 @@
 package com.nummulus.amqp.driver
 
-import com.nummulus.amqp.driver.consumer.MessageConsumer
 import com.rabbitmq.client.AMQP.Queue.DeclareOk
 import com.rabbitmq.client.{Channel => RabbitChannel}
 import com.rabbitmq.client.{Connection => RabbitConnection}
