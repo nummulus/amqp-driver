@@ -1,11 +1,11 @@
 package com.nummulus.amqp.driver
 
+import com.rabbitmq.client.AMQP.BasicProperties
+
 import com.rabbitmq.client.AMQP.Queue.DeclareOk
 import com.rabbitmq.client.{Channel => RabbitChannel}
 import com.rabbitmq.client.{Connection => RabbitConnection}
 import com.rabbitmq.client.{ConnectionFactory => RabbitConnectionFactory}
-import com.rabbitmq.client.{BasicProperties => RabbitBasicProperties}
-import com.rabbitmq.client.AMQP.BasicProperties
 
 /**
  * Wrapper classes around RabbitMQ client classes to ease testing.
