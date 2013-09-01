@@ -41,20 +41,24 @@ class Channel(channel: RabbitChannel) {
   def basicPublish(exchange: String, routingKey: String, properties: MessageProperties, body: Array[Byte]) {
     import scala.collection.JavaConversions._
     
-    val props = new BasicProperties().builder
-      .contentType(properties.contentType)
-      .contentEncoding(properties.contentEncoding)
-      .headers(properties.headers)
-      .deliveryMode(properties.deliveryMode)
-      .priority(properties.priority)
-      .correlationId(properties.correlationId)
-      .replyTo(properties.replyTo)
-      .expiration(properties.expiration)
-      .messageId(properties.messageId)
-      .userId(properties.userId)
-      .appId(properties.appId)
-      .clusterId(properties.cluserId)
-      .build
+    val props = if (properties == null) {
+      null 
+    } else {
+      new BasicProperties().builder
+        .contentType(properties.contentType)
+        .contentEncoding(properties.contentEncoding)
+        .headers(properties.headers)
+        .deliveryMode(properties.deliveryMode)
+        .priority(properties.priority)
+        .correlationId(properties.correlationId)
+        .replyTo(properties.replyTo)
+        .expiration(properties.expiration)
+        .messageId(properties.messageId)
+        .userId(properties.userId)
+        .appId(properties.appId)
+        .clusterId(properties.cluserId)
+        .build
+    }
     
     channel.basicPublish(exchange, routingKey, props, body)
   }

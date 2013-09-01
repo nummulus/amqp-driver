@@ -40,8 +40,9 @@ private[driver] class DefaultConsumer(channel: Channel, configuration: QueueConf
     logger.debug("Sending message to queue: {}", message)
     channel.basicPublish("", configuration.queue, properties, message.getBytes)
     
+    val r = waitForDelivery(correlationId)
     future {
-      waitForDelivery(correlationId)
+      r
     }
   }
   
@@ -61,7 +62,7 @@ private[driver] class DefaultConsumer(channel: Channel, configuration: QueueConf
    */
   @tailrec
   private def waitForDelivery(correlationId: String): String = {
-    logger.debug("Waiting for a response for {}", correlationId)
+    logger.debug("Waiting for a response with correlation id {}", correlationId)
     val delivery = callback.nextDelivery
     if (delivery.properties.correlationId == correlationId) {
       logger.debug("Response received")
