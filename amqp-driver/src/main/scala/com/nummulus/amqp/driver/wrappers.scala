@@ -1,5 +1,7 @@
 package com.nummulus.amqp.driver
 
+import scala.collection.JavaConversions
+
 import com.rabbitmq.client.AMQP.BasicProperties
 
 import com.rabbitmq.client.AMQP.Queue.DeclareOk
@@ -28,9 +30,8 @@ class Channel(channel: RabbitChannel) {
   def queueDeclare(): QueueDeclareOk = new QueueDeclareOk(channel.queueDeclare)
   
   def queueDeclare(queue: String, durable: Boolean, exclusive: Boolean, autoDelete: Boolean, arguments: Map[String, Object]): QueueDeclareOk = {
-    import scala.collection.JavaConversions._
-    
-    new QueueDeclareOk(channel.queueDeclare(queue, durable, exclusive, autoDelete, arguments))
+    val queueArgs = if (arguments == null) null else JavaConversions.mapAsJavaMap(arguments)
+    new QueueDeclareOk(channel.queueDeclare(queue, durable, exclusive, autoDelete, queueArgs))
   }
   
   def basicConsume(queue: String, autoAcknowledge: Boolean, callback: MessageConsumer) {
