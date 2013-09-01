@@ -28,8 +28,8 @@ class BlockingMessageConsumer(channel: Channel) extends MessageConsumer {
         contentType = props.getContentType(),
         contentEncoding = props.getContentEncoding(),
         headers = null,
-        deliveryMode = props.getDeliveryMode(),
-        priority = props.getPriority(),
+        deliveryMode = integer2int(props.getDeliveryMode, 1),
+        priority = integer2int(props.getPriority(), 0),
         correlationId = props.getCorrelationId(),
         replyTo = props.getReplyTo(),
         expiration = props.getExpiration(),
@@ -40,4 +40,9 @@ class BlockingMessageConsumer(channel: Channel) extends MessageConsumer {
     
     Delivery(properties, delivery.getBody())
   }
+  
+  /**
+   * Returns the value if it's not null, returns the default value otherwise.
+   */
+  private def integer2int(value: Integer, defaultValue: Int): Int = if (value != null) value else defaultValue
 }
