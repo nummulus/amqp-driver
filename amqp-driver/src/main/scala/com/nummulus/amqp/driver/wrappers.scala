@@ -63,6 +63,14 @@ class Channel(channel: RabbitChannel) {
     channel.basicPublish(exchange, routingKey, props, body)
   }
   
+  def basicAck(deliveryTag: Long, multiple: Boolean) {
+    channel.basicAck(deliveryTag, multiple)
+  }
+  
+  def basicNack(deliveryTag: Long, multiple: Boolean, requeue: Boolean) {
+    channel.basicNack(deliveryTag, multiple, requeue)
+  }
+  
   def basicQos(prefetchCount: Int) {
     channel.basicQos(prefetchCount)
   }
