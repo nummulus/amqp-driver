@@ -78,7 +78,7 @@ case class MessageProperties(
     contentType: String = "application/json",
     contentEncoding: String = null,
     headers: Map[String, AnyRef] = Map(),
-    deliveryMode: Int = 0,
+    deliveryMode: Int = 1,
     priority: Int = 0,
     correlationId: String = null,
     replyTo: String = null,
