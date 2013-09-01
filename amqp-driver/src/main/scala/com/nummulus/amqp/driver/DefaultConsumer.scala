@@ -13,7 +13,7 @@ import com.nummulus.amqp.driver.consumer.RandomCorrelationIdGenerator
 /**
  * Default consumer implementation.
  */
-private[driver] class DefaultConsumer(channel: Channel, configuration: QueueConfiguration, callback: => BlockingMessageConsumer, correlationIdGenerator: CorrelationIdGenerator = new RandomCorrelationIdGenerator) extends AmqpConsumer {
+private[driver] class DefaultConsumer(channel: Channel, configuration: QueueConfiguration, callback: BlockingMessageConsumer, correlationIdGenerator: CorrelationIdGenerator = new RandomCorrelationIdGenerator) extends AmqpConsumer {
   private val logger = LoggerFactory.getLogger(getClass)
   
   private val responseQueue = channel.queueDeclare.getQueue
@@ -40,9 +40,8 @@ private[driver] class DefaultConsumer(channel: Channel, configuration: QueueConf
     logger.debug("Sending message to queue: {}", message)
     channel.basicPublish("", configuration.queue, properties, message.getBytes)
     
-    val r = waitForDelivery(correlationId)
     future {
-      r
+      waitForDelivery(correlationId)
     }
   }
   
