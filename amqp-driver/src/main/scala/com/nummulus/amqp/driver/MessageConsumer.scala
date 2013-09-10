@@ -5,7 +5,7 @@ import com.nummulus.amqp.driver.consumer.BlockingMessageConsumer
 import com.rabbitmq.client.{Consumer => RabbitConsumer}
 
 /**
- * A message consumer receives messages from a queue and proceses them.
+ * A message consumer receives messages from a queue and processes them.
  */
 trait MessageConsumer {
   /**

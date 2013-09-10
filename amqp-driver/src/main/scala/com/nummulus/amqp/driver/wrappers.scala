@@ -56,7 +56,7 @@ class Channel(channel: RabbitChannel) {
         .messageId(properties.messageId)
         .userId(properties.userId)
         .appId(properties.appId)
-        .clusterId(properties.cluserId)
+        .clusterId(properties.clusterId)
         .build
     }
     
@@ -94,4 +94,4 @@ case class MessageProperties(
     messageId: String = null,
     userId: String = null,
     appId: String = null,
-    cluserId: String = null)
+    clusterId: String = null)
