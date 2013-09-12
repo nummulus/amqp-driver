@@ -5,11 +5,14 @@ import com.nummulus.amqp.driver.configuration.QueueConfiguration
 import com.nummulus.amqp.driver.consumer.Delivery
 import _root_.akka.actor.ActorRef
 import _root_.akka.pattern.ask
+import _root_.akka.pattern.AskTimeoutException
 import _root_.akka.util.Timeout
-import scala.concurrent.Await
+import scala.concurrent._
 import scala.concurrent.duration._
 import scala.util.Failure
 import scala.util.Success
+import scala.util.Failure
+import ExecutionContext.Implicits.global
 
 /**
  * Default provider implementation.
@@ -36,13 +39,15 @@ private[driver] class DefaultProvider(channel: Channel, configuration: QueueConf
     this.actor = None
   }
   
-  def handleNextDelivery() {
-    val delivery = callback.nextDelivery
-
-    if (isQuestion(delivery))
-      handleAsk(delivery)
-    else
-      handleTell(delivery)
+  def handleNextDelivery(): Unit = {
+    future {
+      val delivery = callback.nextDelivery
+  
+      if (isQuestion(delivery))
+        handleAsk(delivery)
+      else
+        handleTell(delivery)
+    }
   }
   
   private def isQuestion(delivery: Delivery) = delivery.properties.correlationId != null
@@ -54,10 +59,16 @@ private[driver] class DefaultProvider(channel: Channel, configuration: QueueConf
   private def handleAsk(delivery: Delivery): Unit =  {
     actor foreach { a =>
       val response = a ? delivery.body.toString
-      // TODO: make this asynchronous
-      val msg = Await.result(response, timeout.duration)
-      val properties = MessageProperties(correlationId = delivery.properties.correlationId)
-      channel.basicPublish("", configuration.queue, properties, msg.toString.getBytes)
+
+      response onComplete {
+        case Success(msg) =>
+          val properties = MessageProperties(correlationId = delivery.properties.correlationId)
+          channel.basicPublish("", configuration.queue, properties, msg.toString.getBytes)
+        case Failure(e: AskTimeoutException) =>
+          // TODO: do something smart when the response times out
+        case Failure(e) =>
+          // TODO: do something smart when the response fails
+      }
     }
   }
 }
