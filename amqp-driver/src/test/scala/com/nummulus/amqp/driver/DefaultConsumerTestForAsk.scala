@@ -40,7 +40,7 @@ class DefaultConsumerTestForAsk extends FlatSpec with Matchers with MockitoSugar
   
   it should "publish a message and receive a response" in new ConsumerFixture {
     val properties = MessageProperties(correlationId = "4")
-    when (messageConsumer.nextDelivery) thenReturn Delivery(properties, "Gromit".getBytes)
+    when (messageConsumer.nextDelivery) thenReturn Delivery(properties, "Gromit".getBytes, 1337)
     
     val response = consumer.ask("Cheese")
     whenReady (response) { r =>
@@ -52,7 +52,7 @@ class DefaultConsumerTestForAsk extends FlatSpec with Matchers with MockitoSugar
     implicit val patienceConfig = PatienceConfig(timeout = Span(100, Millis), interval = Span(5, Millis))
     
     val properties = MessageProperties(correlationId = "wrong-id")
-    when (messageConsumer.nextDelivery) thenReturn Delivery(properties, "Gromit".getBytes)
+    when (messageConsumer.nextDelivery) thenReturn Delivery(properties, "Gromit".getBytes, 1337)
     
     val response = consumer.ask("Cheese")
     val thrown = intercept[TestFailedException] {

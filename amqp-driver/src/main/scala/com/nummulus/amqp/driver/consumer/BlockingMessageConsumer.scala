@@ -38,7 +38,7 @@ class BlockingMessageConsumer(channel: Channel) extends MessageConsumer {
         appId = props.getAppId(),
         clusterId = props.getClusterId())
     
-    Delivery(properties, delivery.getBody())
+    Delivery(properties, delivery.getBody(), delivery.getEnvelope.getDeliveryTag)
   }
   
   /**

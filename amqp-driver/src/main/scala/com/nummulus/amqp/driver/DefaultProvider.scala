@@ -67,6 +67,7 @@ private[driver] class DefaultProvider(channel: Channel, configuration: QueueConf
       logger.debug("Sending message to queue: {}", response)
       logger.debug("Properties = {}", properties)
       channel.basicPublish("", delivery.properties.replyTo, properties, response.getBytes)
+      channel.basicAck(delivery.deliveryTag, false)
     }
     
     actor foreach { a =>
@@ -77,6 +78,7 @@ private[driver] class DefaultProvider(channel: Channel, configuration: QueueConf
           logger.debug("Sending message to queue: {}", msg.toString)
           logger.debug("Properties = {}", properties)
           channel.basicPublish("", delivery.properties.replyTo, properties, msg.toString.getBytes)
+          channel.basicAck(delivery.deliveryTag, false)
         case Failure(e: AskTimeoutException) =>
           // TODO: do something smart when the response times out
           e.printStackTrace()

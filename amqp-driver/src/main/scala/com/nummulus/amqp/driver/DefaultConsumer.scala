@@ -66,6 +66,7 @@ private[driver] class DefaultConsumer(channel: Channel, configuration: QueueConf
     val delivery = callback.nextDelivery
     if (delivery.properties.correlationId == correlationId) {
       logger.debug("Response received")
+      channel.basicAck(delivery.deliveryTag, false)
       new String(delivery.body)
     }
     else {
