@@ -38,6 +38,7 @@ private[driver] class DefaultConsumer(channel: Channel, configuration: QueueConf
         replyTo = responseQueue)
     
     logger.debug("Sending message to queue: {}", message)
+    logger.debug("Properties = {}", properties)
     channel.basicPublish("", configuration.queue, properties, message.getBytes)
     
     future {
