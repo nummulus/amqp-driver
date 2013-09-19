@@ -21,6 +21,7 @@
 
 	<modules>
 		<module>amqp-driver</module>
+		<module>amqp-driver-test</module>
 	</modules>
 
 	<dependencies>
