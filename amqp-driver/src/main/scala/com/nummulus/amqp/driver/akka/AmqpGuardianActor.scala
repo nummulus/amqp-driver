@@ -31,7 +31,10 @@ private[driver] class AmqpGuardianActor(actor: ActorRef, channel: Channel, autoA
     /**
      * Handles an acknowledge message from another actor.
      */
-    case Acknowledge(deliveryTag) => unprocessed -= deliveryTag
+    case Acknowledge(deliveryTag) => {
+      unprocessed -= deliveryTag
+      channel.basicAck(deliveryTag, false)
+    }
     
     /**
      * Handles a terminate message from the watched actor by requeueing all unacknowledged messages.
