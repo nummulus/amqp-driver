@@ -2,6 +2,7 @@
 .metadata/
 .classpath
 .project
+.scala_dependencies
 .settings/
 target/
 .cache
