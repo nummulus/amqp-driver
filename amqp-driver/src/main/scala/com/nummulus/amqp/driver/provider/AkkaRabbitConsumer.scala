@@ -11,7 +11,7 @@ import akka.actor.ActorRef
 /**
  * Akka message consumer.
  */
-class AkkaRabbitConsumer(channel: Channel, actor: ActorRef) extends DefaultConsumer(channel) {
+private[driver] class AkkaRabbitConsumer(channel: Channel, actor: ActorRef) extends DefaultConsumer(channel) {
    override def handleDelivery(consumerTag: String, envelope: Envelope, properties: AMQP.BasicProperties, body: Array[Byte]) {
      val message = new String(body)
      val deliveryTag = envelope.getDeliveryTag
