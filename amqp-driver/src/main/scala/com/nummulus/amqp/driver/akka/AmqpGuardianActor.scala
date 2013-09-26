@@ -21,7 +21,7 @@ private[driver] class AmqpGuardianActor(actor: ActorRef, channel: Channel, autoA
     /**
      * Handles an incoming message from the queue.
      */
-    case m @ AmqpMessage(_, deliveryTag) => {
+    case m @ AmqpRequestMessage(_, deliveryTag) => {
       if (!autoAcknowledge) unprocessed += deliveryTag
       
       actor ! m

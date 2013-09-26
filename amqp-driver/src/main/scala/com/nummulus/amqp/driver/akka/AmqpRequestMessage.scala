@@ -6,4 +6,4 @@ package com.nummulus.amqp.driver.akka
  * @param body message contents
  * @param deliveryTag amqp message identifier
  */
-case class AmqpMessage(body: String, deliveryTag: Long)
+case class AmqpRequestMessage(body: String, deliveryTag: Long)
