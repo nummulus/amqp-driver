@@ -33,8 +33,10 @@ private[driver] class AmqpGuardianActor(actor: ActorRef, channel: Channel, autoA
      * Handles an acknowledge message from another actor.
      */
     case Acknowledge(deliveryTag) => {
-      unprocessed -= deliveryTag
-      channel.basicAck(deliveryTag, false)
+      if (!autoAcknowledge) {
+        unprocessed -= deliveryTag
+        channel.basicAck(deliveryTag, false)
+      }
     }
     
     /**
