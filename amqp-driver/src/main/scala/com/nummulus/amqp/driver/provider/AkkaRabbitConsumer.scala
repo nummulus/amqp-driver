@@ -1,6 +1,7 @@
 package com.nummulus.amqp.driver.provider
 
-import com.nummulus.amqp.driver.akka.AmqpRequestMessage
+import com.nummulus.amqp.driver.MessageProperties
+import com.nummulus.amqp.driver.akka.AmqpRequestMessageWithProperties
 import com.rabbitmq.client.AMQP
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.DefaultConsumer
@@ -16,6 +17,6 @@ private[driver] class AkkaRabbitConsumer(channel: Channel, actor: ActorRef) exte
      val message = new String(body)
      val deliveryTag = envelope.getDeliveryTag
      
-     actor ! AmqpRequestMessage(message, deliveryTag)
+     actor ! AmqpRequestMessageWithProperties(message, MessageProperties(properties), deliveryTag)
    }
 }
