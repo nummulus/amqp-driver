@@ -33,9 +33,8 @@ class Channel(channel: RabbitChannel) {
     new QueueDeclareOk(channel.queueDeclare(queue, durable, exclusive, autoDelete, queueArgs))
   }
   
-  def basicConsume(queue: String, autoAcknowledge: Boolean, callback: MessageConsumer) {
+  def basicConsume(queue: String, autoAcknowledge: Boolean, callback: MessageConsumer): String =
     channel.basicConsume(queue, autoAcknowledge, callback.get)
-  }
   
   def basicPublish(exchange: String, routingKey: String, properties: MessageProperties, body: Array[Byte]) {
     import scala.collection.JavaConversions._
@@ -72,6 +71,10 @@ class Channel(channel: RabbitChannel) {
   
   def basicQos(prefetchCount: Int) {
     channel.basicQos(prefetchCount)
+  }
+  
+  def basicCancel(consumerTag: String) {
+    channel.basicCancel(consumerTag)
   }
   
   private[driver] def get: RabbitChannel = channel
