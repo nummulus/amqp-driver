@@ -1,9 +1,8 @@
 package com.nummulus.amqp.driver
-
 import scala.collection.JavaConversions
 
+import com.rabbitmq.client.AMQP
 import com.rabbitmq.client.AMQP.BasicProperties
-
 import com.rabbitmq.client.AMQP.Queue.DeclareOk
 import com.rabbitmq.client.{Channel => RabbitChannel}
 import com.rabbitmq.client.{Connection => RabbitConnection}
@@ -95,3 +94,25 @@ case class MessageProperties(
     userId: String = null,
     appId: String = null,
     clusterId: String = null)
+
+object MessageProperties {
+  def apply(props: AMQP.BasicProperties): MessageProperties =
+    MessageProperties(
+        contentType = props.getContentType(),
+        contentEncoding = props.getContentEncoding(),
+        headers = null,
+        deliveryMode = integer2int(props.getDeliveryMode, 1),
+        priority = integer2int(props.getPriority(), 0),
+        correlationId = props.getCorrelationId(),
+        replyTo = props.getReplyTo(),
+        expiration = props.getExpiration(),
+        messageId = props.getMessageId(),
+        userId = props.getUserId(),
+        appId = props.getAppId(),
+        clusterId = props.getClusterId())
+  
+  /**
+   * Returns the value if it's not null, returns the default value otherwise.
+   */
+  private def integer2int(value: Integer, defaultValue: Int): Int = if (value != null) value else defaultValue
+}

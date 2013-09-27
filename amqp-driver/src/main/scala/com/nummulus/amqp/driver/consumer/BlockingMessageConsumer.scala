@@ -22,27 +22,8 @@ class BlockingMessageConsumer(channel: Channel) extends MessageConsumer {
    */
   def nextDelivery: Delivery = {
     val delivery = consumer.nextDelivery()
-    val props = delivery.getProperties()
-    
-    val properties = MessageProperties(
-        contentType = props.getContentType(),
-        contentEncoding = props.getContentEncoding(),
-        headers = null,
-        deliveryMode = integer2int(props.getDeliveryMode, 1),
-        priority = integer2int(props.getPriority(), 0),
-        correlationId = props.getCorrelationId(),
-        replyTo = props.getReplyTo(),
-        expiration = props.getExpiration(),
-        messageId = props.getMessageId(),
-        userId = props.getUserId(),
-        appId = props.getAppId(),
-        clusterId = props.getClusterId())
+    val properties = MessageProperties(delivery.getProperties())
     
     Delivery(properties, delivery.getBody(), delivery.getEnvelope.getDeliveryTag)
   }
-  
-  /**
-   * Returns the value if it's not null, returns the default value otherwise.
-   */
-  private def integer2int(value: Integer, defaultValue: Int): Int = if (value != null) value else defaultValue
 }
