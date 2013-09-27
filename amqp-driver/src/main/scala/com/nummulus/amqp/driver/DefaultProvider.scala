@@ -18,7 +18,7 @@ private[driver] class DefaultProvider(channel: Channel, configuration: QueueConf
   private lazy val actorSystem = ActorSystem("AmqpDriver")
   
   private val requestQueue = channel.queueDeclare(configuration.queue, configuration.durable, configuration.exclusive, configuration.autoDelete, null)
-  logger.debug("Declared request queue: {}", requestQueue.getQueue)
+  logger.debug("Declared request queue: {}", configuration.queue)
   
   channel.basicQos(1)
   
