@@ -25,7 +25,7 @@ private[driver] class DefaultProvider(channel: Channel, configuration: QueueConf
   private var consumerTag: Option[String] = None
   
   def bind(actor: ActorRef) {
-    val guardianActor = actorSystem.actorOf(Props(classOf[AmqpGuardianActor], actor, channel, configuration), configuration.queue + "!guardian")
+    val guardianActor = actorSystem.actorOf(Props(classOf[AmqpGuardianActor], actor, channel, configuration), configuration.queue + "Guardian")
     val callback = new AkkaMessageConsumer(channel, guardianActor)
     
     consumerTag = Some(channel.basicConsume(requestQueue.getQueue, configuration.autoAcknowledge, callback))
