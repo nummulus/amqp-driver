@@ -17,6 +17,9 @@
 		<maven.compiler.source>1.6</maven.compiler.source>
 		<maven.compiler.target>1.6</maven.compiler.target>
 		<encoding>UTF-8</encoding>
+
+		<!-- Global versions -->
+		<akka.version>2.2.0</akka.version>
 	</properties>
 
 	<modules>
@@ -42,7 +45,7 @@
 			<dependency>
 				<groupId>com.typesafe.akka</groupId>
 				<artifactId>akka-actor_${scala.version}</artifactId>
-				<version>2.2.0</version>
+				<version>${akka.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>ch.qos.logback</groupId>
@@ -67,6 +70,12 @@
 				<groupId>org.mockito</groupId>
 				<artifactId>mockito-all</artifactId>
 				<version>1.9.5</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>com.typesafe.akka</groupId>
+				<artifactId>akka-testkit_${scala.version}</artifactId>
+				<version>${akka.version}</version>
 				<scope>test</scope>
 			</dependency>
 		</dependencies>
