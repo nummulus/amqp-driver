@@ -8,36 +8,47 @@ import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import scala.concurrent.Await
 import scala.concurrent.duration.DurationInt
+import akka.actor.ActorSystem
+import akka.actor.Actor
+import akka.actor.Props
+import akka.testkit.TestProbe
+import com.nummulus.amqp.driver.akka.AmqpRequestMessage
+import com.nummulus.amqp.driver.fixture.ProviderConsumerFixture
+import org.scalatest.FlatSpec
+import org.scalatest.concurrent.Futures
+import org.scalatest.concurrent.ScalaFutures
+import com.nummulus.amqp.driver.akka.AmqpRequestMessage
+import com.nummulus.amqp.driver.akka.AmqpResponseMessage
 
 @RunWith(classOf[JUnitRunner])
-class ConnectionTest extends FunSuite with Conductors with Matchers {
+class ConnectionTest extends FlatSpec with Matchers with ScalaFutures {
+  behavior of "Provider/Consumer System"
 
-  test("Configuring a consumer and provider, then sending a message") {
-    val driver = AmqpDriver("ampq.conf")
-    val consumer = driver.newConsumer("service.test", "Test")
-    val provider = driver.newProvider("Test")
-    
-    val conductor = new Conductor
-    import conductor._
-    
-    thread("consumer") {
-      val response = consumer.ask("hello?")
-      waitForBeat(2)
-      val reaction = Await.result(response, 1.second)
-      reaction should be ("world!")
-      beat should be(2)
-    }
+  it should "Check if a message from a consumer is delivered at an actor bound to a provider" in new ProviderConsumerFixture() {
+    implicit val system = ActorSystem("Test")
+    val probe = TestProbe()
+    provider.bind(probe.ref)
 
-    thread("producer") {
-      waitForBeat(1)
-      provider.bindCallBack( (_) => "world!")
-      provider.handleNextDelivery()
-      waitForBeat(2)
-      beat should be(2)
+    val response = consumer.ask("hello?")
+    probe.expectMsg(AmqpRequestMessage("hello?", 1))
+  }
+
+  it should "Deliver a message back to the consumer" in new ProviderConsumerFixture() {
+    implicit val system = ActorSystem("Test")
+    val actor = system.actorOf(Props[EchoActor])
+    provider.bind(actor)
+
+    val response = consumer.ask("hello?")
+    whenReady(response) { s =>
+      s should be("world!")
     }
-    
-    whenFinished {
-      beat should be(2)
+  }
+}
+
+class EchoActor extends Actor {
+  def receive = {
+    case AmqpRequestMessage(body, deliveryTag) => {
+      sender ! AmqpResponseMessage("world!", deliveryTag)
     }
   }
 }
