@@ -1,12 +1,14 @@
 package com.nummulus.amqp.driver
 import scala.collection.JavaConversions
-
 import com.rabbitmq.client.AMQP
 import com.rabbitmq.client.AMQP.BasicProperties
 import com.rabbitmq.client.AMQP.Queue.DeclareOk
 import com.rabbitmq.client.{Channel => RabbitChannel}
 import com.rabbitmq.client.{Connection => RabbitConnection}
 import com.rabbitmq.client.{ConnectionFactory => RabbitConnectionFactory}
+import com.rabbitmq.client.ShutdownListener
+import com.rabbitmq.client.ShutdownSignalException
+import org.slf4j.LoggerFactory
 
 /**
  * Wrapper classes around RabbitMQ client classes to ease testing.
@@ -26,6 +28,8 @@ class Connection(connection: RabbitConnection) {
 }
 
 class Channel(channel: RabbitChannel) {
+  channel.addShutdownListener(ShutdownLogger())
+  
   def queueDeclare(): QueueDeclareOk = new QueueDeclareOk(channel.queueDeclare)
   
   def queueDeclare(queue: String, durable: Boolean, exclusive: Boolean, autoDelete: Boolean, arguments: Map[String, Object]): QueueDeclareOk = {
@@ -82,6 +86,15 @@ class Channel(channel: RabbitChannel) {
 
 class QueueDeclareOk(declareOk: DeclareOk) {
   def getQueue: String = declareOk.getQueue
+}
+
+class ShutdownLogger extends ShutdownListener {
+  private val logger = LoggerFactory.getLogger(getClass)
+  def shutdownCompleted(cause: ShutdownSignalException): Unit = logger.info("Closed channel, because: {}", cause.getReason())
+}
+
+object ShutdownLogger {
+  def apply(): ShutdownLogger = new ShutdownLogger()
 }
 
 case class MessageProperties(

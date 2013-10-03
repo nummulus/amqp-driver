@@ -3,10 +3,10 @@ package com.nummulus.amqp.driver.akka
 import com.nummulus.amqp.driver.Channel
 import com.nummulus.amqp.driver.MessageProperties
 import com.nummulus.amqp.driver.configuration.QueueConfiguration
-
 import akka.actor.Actor
 import akka.actor.ActorRef
 import akka.actor.Terminated
+import org.slf4j.LoggerFactory
 
 /**
  * Entry point for AMQP messages to enter the Akka world.
@@ -15,6 +15,7 @@ import akka.actor.Terminated
  * all unacknowledged messages will be requeued.
  */
 private[driver] class AmqpGuardianActor(actor: ActorRef, channel: Channel, configuration: QueueConfiguration) extends Actor {
+  private val logger = LoggerFactory.getLogger(getClass)
   private var unacknowledged = Set[Long]()
   private var unanswered = Map[Long, MessageProperties]()
   private val autoAcknowledge = configuration.autoAcknowledge
@@ -66,6 +67,10 @@ private[driver] class AmqpGuardianActor(actor: ActorRef, channel: Channel, confi
     case Terminated => {
       unacknowledged foreach (channel.basicNack(_, false, true))
       unanswered = unanswered.empty
+    }
+    
+    case x => {
+      logger.error("Got unknown message {}", x)
     }
   }
 }
