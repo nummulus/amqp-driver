@@ -31,8 +31,6 @@ private[driver] class AmqpGuardianActor(actor: ActorRef, channel: Channel, confi
       if (properties.replyTo != null && !properties.replyTo.isEmpty) unanswered += (deliveryTag -> properties)
       
       actor ! AmqpRequestMessage(body, deliveryTag)
-      
-      if (autoAcknowledge) channel.basicAck(deliveryTag, false)
     }
     
     /**
