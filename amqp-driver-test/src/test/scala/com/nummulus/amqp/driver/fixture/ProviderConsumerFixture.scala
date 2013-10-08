@@ -11,38 +11,10 @@ import com.typesafe.config.Config
 import com.typesafe.config.impl.SimpleConfigObject
 import com.typesafe.config._
 
-class ProviderConsumerFixture() {
-  val configuration = """
-  amqp {
-    host = localhost
-    defines {
-      serviceName = service.test
-      Test {
-        queue = Test
-        durable = false
-        exclusive = false
-        autoDelete = false
-        autoAcknowledge = false
-      }
-    }
-    uses {
-      service.test {
-        serviceName = service.test
-        Test {
-          queue = Test
-          durable = false
-          exclusive = false
-          autoDelete = false
-          autoAcknowledge = true
-        }
-      }
-    }
-  }"""
-
-  val config = ConfigFactory.parseString(configuration);
+class ProviderConsumerFixture(fileName: String) {
+  val config = ConfigFactory.load(fileName);
   val connectionFactory = new ConnectionFactory(new RabbitConnectionFactory)
   val driver = new DefaultDriver(connectionFactory, config)
   val consumer = driver.newConsumer("service.test", "Test")
   val provider = driver.newProvider("Test")
-
 }
