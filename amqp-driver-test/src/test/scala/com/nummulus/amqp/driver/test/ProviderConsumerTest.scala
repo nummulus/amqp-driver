@@ -19,29 +19,47 @@ import org.scalatest.concurrent.Futures
 import org.scalatest.concurrent.ScalaFutures
 import com.nummulus.amqp.driver.akka.AmqpRequestMessage
 import com.nummulus.amqp.driver.akka.AmqpResponseMessage
+import org.scalatest.prop.PropertyChecks
+import org.scalatest.prop.TableDrivenPropertyChecks
+import org.scalatest.OneInstancePerTest
 
 @RunWith(classOf[JUnitRunner])
-class ConnectionTest extends FlatSpec with Matchers with ScalaFutures {
-  behavior of "Provider/Consumer System"
+class ConnectionTest extends FlatSpec with Matchers with ScalaFutures with TableDrivenPropertyChecks {
 
-  ignore should "Check if a message from a consumer is delivered at an actor bound to a provider" in new ProviderConsumerFixture("ProviderConsumer.conf") {
-    implicit val system = ActorSystem("Test")
-    val probe = TestProbe()
-    provider.bind(probe.ref)
+  val propertyFiles = Table(("file"),
+    ("ProviderConsumer_1.conf"),
+    ("ProviderConsumer_2.conf"),
+    ("ProviderConsumer_3.conf"),
+    ("ProviderConsumer_4.conf")
+  )
 
-    val response = consumer.ask("hello?")
-    probe.expectMsg(AmqpRequestMessage("hello?", 1))
-    provider.unbind();
+  forAll(propertyFiles) { (propertyFile : String) =>
+    behavior of "The Provider/Consumer System  with configuration " + propertyFile
+    
+    it should "deliver a message back to the consumer" in new ProviderConsumerFixture(propertyFile) {
+      val system = ActorSystem("Test")
+      val actor = system.actorOf(Props[EchoActor])
+      provider.bind(actor)
+
+      val response = consumer.ask("hello?")
+      whenReady(response) { s =>
+        s should be("world!")
+      }
+      provider.unbind();
+    }
   }
+  
+  forAll(propertyFiles) { (propertyFile : String) =>
+    behavior of "The Consumer with configuration " + propertyFile
+    
+    it should "send a message to the provider" in new ProviderConsumerFixture(propertyFile) {
+      implicit val system = ActorSystem("Test")
+      val probe = TestProbe()
+      provider.bind(probe.ref)
 
-  it should "Deliver a message back to the consumer" in new ProviderConsumerFixture("ProviderConsumer.conf") {
-    val system = ActorSystem("Test")
-    val actor = system.actorOf(Props[EchoActor])
-    provider.bind(actor)
-
-    val response = consumer.ask("hello?")
-    whenReady(response) { s =>
-      s should be("world!")
+      val response = consumer.ask("hello?")
+      probe.expectMsg(AmqpRequestMessage("hello?", 1))
+      provider.unbind();
     }
   }
 }
