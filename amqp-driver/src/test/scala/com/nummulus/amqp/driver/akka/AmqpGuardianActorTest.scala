@@ -1,24 +1,22 @@
 package com.nummulus.amqp.driver.akka
 
 import org.junit.runner.RunWith
-import org.mockito.Mockito._
 import org.mockito.Matchers._
+import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.FlatSpecLike
 import org.scalatest.Matchers
+import org.scalatest.OneInstancePerTest
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
 import com.nummulus.amqp.driver.Channel
 import com.nummulus.amqp.driver.MessageProperties
 import com.nummulus.amqp.driver.configuration.QueueConfiguration
-import com.nummulus.amqp.driver.configuration.QueueConfiguration
 import akka.actor.ActorRef
 import akka.actor.ActorSystem
+import akka.actor.Terminated
+import akka.testkit.TestActorRef
 import akka.testkit.TestKit
-import akka.actor.Props
-import org.scalatest.OneInstancePerTest
-import org.mockito.stubbing.Answer
-import org.mockito.invocation.InvocationOnMock
 
 @RunWith(classOf[JUnitRunner])
 class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system")) with FlatSpecLike with Matchers
@@ -27,9 +25,10 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system")) with Fla
   val channel = mock[Channel]
   var ackCount = 0
 
-  val someMessage = "some message"
+  val someMessageBody = "some message"
   val someReplyTo = "some Rabbit channel"
   val someDeliveryTag = 42L
+  val someMessage = createMessage()
   
   
   
@@ -37,17 +36,17 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system")) with Fla
 
   val autoAckGuardian = createGuardian(true)
   
-  it should "pass on a message that appears on the channel and acknowledge it automatically" in {
-    val msg = createMessage(someReplyTo)
-    
-    autoAckGuardian ! msg
-    expectMsg(AmqpRequestMessage(someMessage, someDeliveryTag))
-    verify (channel, times(1)).basicAck(anyLong, anyBoolean)
+  it should "pass on a message that appears on the channel" in {
+    autoAckGuardian ! someMessage
 
-    reset(channel)
-
+    expectMsg(AmqpRequestMessage(someMessageBody, someDeliveryTag))
+  }
+  
+  it should "never acknowledge a message, even when asked to (because RabbitMQ is responsible for that!)" in {
+    autoAckGuardian ! someMessage
     autoAckGuardian ! Acknowledge(someDeliveryTag)
-    verify (channel, never()).basicAck(anyLong, anyBoolean)
+
+    acknowledgeNever(someDeliveryTag)
   }
   
   
@@ -56,19 +55,35 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system")) with Fla
 
   val noAckGuardian = createGuardian(false)
   
-  it should "pass on a message that appears on the channel and acknowledge it when requested to" in {
-    val msg = createMessage(someReplyTo)
-    
-    noAckGuardian ! msg
-    
-    expectMsg(AmqpRequestMessage(someMessage, someDeliveryTag))
-    verify (channel, never()).basicAck(anyLong, anyBoolean)
+  it should "pass on a message that appears on the channel" in {
+    noAckGuardian ! someMessage
 
-    reset(channel)
+    expectMsg(AmqpRequestMessage(someMessageBody, someDeliveryTag))
+  }
+  
+  it should "acknowledge a message, but only when requested to" in {
+    noAckGuardian ! someMessage
+    acknowledgeNever(someDeliveryTag)
 
     noAckGuardian ! Acknowledge(someDeliveryTag)
-    Thread.sleep(1000)
-    verify (channel, times(1)).basicAck(anyLong, anyBoolean)
+    acknowledgeOnce(someDeliveryTag)
+  }
+  
+  it should "not acknowledge to the channel when the wrong delivery tag is acknowledged" in {
+    val anotherDeliveryTag = someDeliveryTag + 1
+
+    noAckGuardian ! someMessage
+    noAckGuardian ! Acknowledge(anotherDeliveryTag)
+
+    acknowledgeNever(someDeliveryTag)
+    acknowledgeOnce(anotherDeliveryTag)
+  }
+  
+  it should "explicitly Nack a message when it receives a terminate" in {
+    noAckGuardian ! someMessage
+    noAckGuardian ! Terminated
+    
+    verify (channel, times(1)).basicNack(someDeliveryTag, false, true)
   }
   
   
@@ -76,14 +91,24 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system")) with Fla
   override def afterAll {
     TestKit.shutdownActorSystem(system)
   }
-
+  
+  private def acknowledgeNever(deliveryTag: Long) {
+    verify (channel, never()).basicAck(deliveryTag, true)
+    verify (channel, never()).basicAck(deliveryTag, false)
+  }
+  
+  private def acknowledgeOnce(deliveryTag: Long) {
+    verify (channel, times(1)).basicAck(deliveryTag, false)
+    verify (channel, never()).basicAck(deliveryTag, true)
+  }
+  
   private def createGuardian(autoAcknowledge: Boolean): ActorRef = {
     val name = if (autoAcknowledge) "AutoAckTestGuardian" else "NoAckTestGuardian"
     val configuration = mock[QueueConfiguration]
     when (configuration.autoAcknowledge) thenReturn autoAcknowledge
-    system.actorOf(Props(classOf[AmqpGuardianActor], testActor, channel, configuration), name)
+    TestActorRef(new AmqpGuardianActor(testActor, channel, configuration))
   }
   
-  private def createMessage(replyTo: String): AmqpRequestMessageWithProperties =
-    AmqpRequestMessageWithProperties(someMessage, MessageProperties(replyTo = replyTo), someDeliveryTag)
+  private def createMessage(messageBody: String = someMessageBody, replyTo: String = someReplyTo, deliveryTag: Long = someDeliveryTag): AmqpRequestMessageWithProperties =
+    AmqpRequestMessageWithProperties(someMessageBody, MessageProperties(replyTo = replyTo), someDeliveryTag)
 }
