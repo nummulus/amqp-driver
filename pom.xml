@@ -14,8 +14,8 @@
 		<scala-maven-plugin.version>3.1.2</scala-maven-plugin.version>
 
 		<!-- Maven -->
-		<maven.compiler.source>1.6</maven.compiler.source>
-		<maven.compiler.target>1.6</maven.compiler.target>
+		<maven.compiler.source>1.7</maven.compiler.source>
+		<maven.compiler.target>1.7</maven.compiler.target>
 		<encoding>UTF-8</encoding>
 
 		<!-- Global versions -->
