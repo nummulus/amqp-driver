@@ -9,6 +9,7 @@ import com.nummulus.amqp.driver.configuration.QueueConfiguration
 import com.nummulus.amqp.driver.consumer.BlockingMessageConsumer
 import com.nummulus.amqp.driver.consumer.CorrelationIdGenerator
 import com.nummulus.amqp.driver.consumer.RandomCorrelationIdGenerator
+import java.nio.charset.StandardCharsets
 
 /**
  * Default consumer implementation.
@@ -67,7 +68,7 @@ private[driver] class DefaultConsumer(channel: Channel, configuration: QueueConf
     if (delivery.properties.correlationId == correlationId) {
       logger.debug("Response received")
       channel.basicAck(delivery.deliveryTag, false)
-      new String(delivery.body)
+      new String(delivery.body, StandardCharsets.UTF_8)
     }
     else {
       logger.debug("Received response with wrong correlationId")
