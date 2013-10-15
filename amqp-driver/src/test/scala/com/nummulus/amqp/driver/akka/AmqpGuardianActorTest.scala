@@ -26,9 +26,12 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system")) with Fla
   var ackCount = 0
 
   val someMessageBody = "some message"
+  val someResponseBody = "some response"
+  val someCorrelationId = "some correlation"
   val someReplyTo = "some Rabbit channel"
   val someDeliveryTag = 42L
   val someMessage = createMessage()
+  val someResponse = createResponse()
   
   
   
@@ -46,7 +49,42 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system")) with Fla
     autoAckGuardian ! someMessage
     autoAckGuardian ! Acknowledge(someDeliveryTag)
 
-    acknowledgeNever(someDeliveryTag)
+    verifyAcknowledgeNever(someDeliveryTag)
+  }
+  
+  it should "publish a response to the channel" in {
+    autoAckGuardian ! someMessage
+    autoAckGuardian ! someResponse
+    
+    verifyPublishMessage(someReplyTo, someCorrelationId, someResponseBody)
+  }
+  
+  it should "ignore a response to an unknown message" in {
+    autoAckGuardian ! someResponse
+    
+    verifyPublishNothing()
+  }
+  
+  it should "ignore the second response to a message" in {
+    autoAckGuardian ! someMessage
+    autoAckGuardian ! someResponse
+    
+    reset(channel)
+    
+    autoAckGuardian ! someResponse
+    
+    verifyPublishNothing()
+  }
+  
+  it should "ignore responses if the guardian is already terminated" in {
+    autoAckGuardian ! someMessage
+    autoAckGuardian ! Terminated
+    
+    reset(channel)
+    
+    autoAckGuardian ! someResponse
+
+    verifyPublishNothing()
   }
   
   
@@ -63,10 +101,10 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system")) with Fla
   
   it should "acknowledge a message, but only when requested to" in {
     noAckGuardian ! someMessage
-    acknowledgeNever(someDeliveryTag)
+    verifyAcknowledgeNever(someDeliveryTag)
 
     noAckGuardian ! Acknowledge(someDeliveryTag)
-    acknowledgeOnce(someDeliveryTag)
+    verifyAcknowledgeOnce(someDeliveryTag)
   }
   
   it should "not acknowledge to the channel when the wrong delivery tag is acknowledged" in {
@@ -75,15 +113,54 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system")) with Fla
     noAckGuardian ! someMessage
     noAckGuardian ! Acknowledge(anotherDeliveryTag)
 
-    acknowledgeNever(someDeliveryTag)
-    acknowledgeOnce(anotherDeliveryTag)
+    verifyAcknowledgeNever(someDeliveryTag)
+    verifyAcknowledgeOnce(anotherDeliveryTag)
   }
   
-  it should "explicitly Nack a message when it receives a terminate" in {
+  it should "explicitly Nack a message when it receives Terminated" in {
     noAckGuardian ! someMessage
     noAckGuardian ! Terminated
     
     verify (channel, times(1)).basicNack(someDeliveryTag, false, true)
+  }
+  
+  it should "publish a response to the channel" in {
+    noAckGuardian ! someMessage
+    noAckGuardian ! someResponse
+    
+    verifyAcknowledgeOnce(someDeliveryTag)
+    verifyPublishMessage(someReplyTo, someCorrelationId, someResponseBody)
+  }
+  
+  it should "ignore a response to an unknown message" in {
+    noAckGuardian ! someResponse
+    
+    verifyAcknowledgeOnce(someDeliveryTag)
+    verifyPublishNothing()
+  }
+  
+  it should "ignore the second response to a message" in {
+    noAckGuardian ! someMessage
+    noAckGuardian ! someResponse
+    
+    reset(channel)
+    
+    noAckGuardian ! someResponse
+    
+    verifyAcknowledgeOnce(someDeliveryTag)
+    verifyPublishNothing()
+  }
+  
+  it should "ignore responses if the guardian is already terminated" in {
+    noAckGuardian ! someMessage
+    noAckGuardian ! Terminated
+    
+    reset(channel)
+    
+    noAckGuardian ! someResponse
+
+    verifyAcknowledgeOnce(someDeliveryTag)
+    verifyPublishNothing()
   }
   
   
@@ -92,14 +169,22 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system")) with Fla
     TestKit.shutdownActorSystem(system)
   }
   
-  private def acknowledgeNever(deliveryTag: Long) {
+  private def verifyAcknowledgeNever(deliveryTag: Long) {
     verify (channel, never()).basicAck(deliveryTag, true)
     verify (channel, never()).basicAck(deliveryTag, false)
   }
   
-  private def acknowledgeOnce(deliveryTag: Long) {
+  private def verifyAcknowledgeOnce(deliveryTag: Long) {
     verify (channel, times(1)).basicAck(deliveryTag, false)
     verify (channel, never()).basicAck(deliveryTag, true)
+  }
+  
+  private def verifyPublishNothing() {
+    verify (channel, never()).basicPublish(anyString, anyString, any[MessageProperties], any[Array[Byte]])
+  }
+
+  private def verifyPublishMessage(replyTo: String, correlationId: String, body: String) {
+    verify (channel, times(1)).basicPublish("", replyTo, MessageProperties(correlationId = correlationId), body.getBytes)
   }
   
   private def createGuardian(autoAcknowledge: Boolean): ActorRef = {
@@ -109,6 +194,9 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system")) with Fla
     TestActorRef(new AmqpGuardianActor(testActor, channel, configuration))
   }
   
-  private def createMessage(messageBody: String = someMessageBody, replyTo: String = someReplyTo, deliveryTag: Long = someDeliveryTag): AmqpRequestMessageWithProperties =
-    AmqpRequestMessageWithProperties(someMessageBody, MessageProperties(replyTo = replyTo), someDeliveryTag)
+  private def createMessage(messageBody: String = someMessageBody, correlationId: String = someCorrelationId, replyTo: String = someReplyTo, deliveryTag: Long = someDeliveryTag): AmqpRequestMessageWithProperties =
+    AmqpRequestMessageWithProperties(someMessageBody, MessageProperties(correlationId = correlationId, replyTo = replyTo), someDeliveryTag)
+  
+  private def createResponse(messageBody: String = someResponseBody, deliveryTag: Long = someDeliveryTag): AmqpResponseMessage =
+    AmqpResponseMessage(someResponseBody, someDeliveryTag)
 }
