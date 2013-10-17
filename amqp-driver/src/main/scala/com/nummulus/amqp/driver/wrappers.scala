@@ -1,4 +1,5 @@
 package com.nummulus.amqp.driver
+
 import scala.collection.JavaConversions
 import com.rabbitmq.client.AMQP
 import com.rabbitmq.client.AMQP.BasicProperties
