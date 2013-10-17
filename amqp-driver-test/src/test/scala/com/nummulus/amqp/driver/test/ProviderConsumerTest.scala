@@ -25,7 +25,7 @@ import org.scalatest.OneInstancePerTest
 import com.nummulus.amqp.driver.akka.Acknowledge
 
 @RunWith(classOf[JUnitRunner])
-class ConnectionTest extends FlatSpec with Matchers with ScalaFutures with TableDrivenPropertyChecks {
+class ProviderConsumerTest extends FlatSpec with Matchers with ScalaFutures with TableDrivenPropertyChecks {
 
   val propertyFiles = Table(("file"),
     ("ProviderConsumer_1.conf"),
