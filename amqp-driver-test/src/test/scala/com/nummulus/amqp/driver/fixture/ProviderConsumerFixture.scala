@@ -10,6 +10,7 @@ import com.nummulus.amqp.driver.DefaultProvider
 import com.typesafe.config.Config
 import com.typesafe.config.impl.SimpleConfigObject
 import com.typesafe.config._
+import akka.actor.ActorSystem
 
 class ProviderConsumerFixture(fileName: String) {
   val config = ConfigFactory.load(fileName);
@@ -17,4 +18,5 @@ class ProviderConsumerFixture(fileName: String) {
   val driver = new DefaultDriver(connectionFactory, config)
   val consumer = driver.newConsumer("service.test", "Test")
   val provider = driver.newProvider("Test")
+  implicit val system = ActorSystem("Test")
 }

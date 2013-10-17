@@ -22,6 +22,7 @@ import com.nummulus.amqp.driver.akka.AmqpResponseMessage
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.prop.TableDrivenPropertyChecks
 import org.scalatest.OneInstancePerTest
+import com.nummulus.amqp.driver.akka.Acknowledge
 
 @RunWith(classOf[JUnitRunner])
 class ConnectionTest extends FlatSpec with Matchers with ScalaFutures with TableDrivenPropertyChecks {
@@ -37,13 +38,12 @@ class ConnectionTest extends FlatSpec with Matchers with ScalaFutures with Table
     behavior of "The Provider/Consumer System  with configuration " + propertyFile
     
     it should "deliver a message back to the consumer" in new ProviderConsumerFixture(propertyFile) {
-      val system = ActorSystem("Test")
       val actor = system.actorOf(Props[EchoActor])
       provider.bind(actor)
 
       val response = consumer.ask("hello?")
       whenReady(response) { s =>
-        s should be("world!")
+        s should be("hello?")
       }
       provider.unbind();
     }
@@ -52,8 +52,7 @@ class ConnectionTest extends FlatSpec with Matchers with ScalaFutures with Table
   forAll(propertyFiles) { (propertyFile : String) =>
     behavior of "The Consumer with configuration " + propertyFile
     
-    it should "send a message to the provider" in new ProviderConsumerFixture(propertyFile) {
-      implicit val system = ActorSystem("Test")
+    it should "asks a provider a question and checks the result" in new ProviderConsumerFixture(propertyFile) {
       val probe = TestProbe()
       provider.bind(probe.ref)
 
@@ -62,12 +61,25 @@ class ConnectionTest extends FlatSpec with Matchers with ScalaFutures with Table
       provider.unbind();
     }
   }
+  
+  forAll(propertyFiles) { (propertyFile : String) =>
+    behavior of "The Consumer with configuration " + propertyFile
+    
+    it should "tells a provider" in new ProviderConsumerFixture(propertyFile) {
+      val probe = TestProbe()
+      provider.bind(probe.ref)
+
+      val response = consumer.tell("I pity the fool!")
+      probe.expectMsg(AmqpRequestMessage("I pity the fool!", 1))
+      provider.unbind();
+    }
+  }
 }
 
 class EchoActor extends Actor {
   def receive = {
     case AmqpRequestMessage(body, deliveryTag) => {
-      sender ! AmqpResponseMessage("world!", deliveryTag)
+      sender ! AmqpResponseMessage(body, deliveryTag)
     }
   }
 }
