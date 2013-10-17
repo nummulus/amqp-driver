@@ -18,5 +18,4 @@ class ProviderConsumerFixture(fileName: String) {
   val driver = new DefaultDriver(connectionFactory, config)
   val consumer = driver.newConsumer("service.test", "Test")
   val provider = driver.newProvider("Test")
-  implicit val system = ActorSystem("Test")
 }

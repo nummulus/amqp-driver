@@ -23,9 +23,12 @@ import org.scalatest.prop.PropertyChecks
 import org.scalatest.prop.TableDrivenPropertyChecks
 import org.scalatest.OneInstancePerTest
 import com.nummulus.amqp.driver.akka.Acknowledge
+import org.scalatest.FlatSpecLike
+import akka.testkit.TestKit
 
 @RunWith(classOf[JUnitRunner])
-class ProviderConsumerTest extends FlatSpec with Matchers with ScalaFutures with TableDrivenPropertyChecks {
+class ProviderConsumerTest extends TestKit(ActorSystem("test-system")) with FlatSpecLike with Matchers 
+  with ScalaFutures with TableDrivenPropertyChecks {
 
   val propertyFiles = Table(("file"),
     ("ProviderConsumer_1.conf"),
@@ -38,13 +41,13 @@ class ProviderConsumerTest extends FlatSpec with Matchers with ScalaFutures with
     behavior of "The Provider/Consumer System  with configuration " + propertyFile
     
     it should "deliver a message back to the consumer" in new ProviderConsumerFixture(propertyFile) {
-      val actor = system.actorOf(Props[EchoActor])
-      provider.bind(actor)
+      provider.bind(system.actorOf(Props[EchoActor]))
 
       val response = consumer.ask("hello?")
       whenReady(response) { s =>
         s should be("hello?")
       }
+      
       provider.unbind();
     }
   }
@@ -53,11 +56,11 @@ class ProviderConsumerTest extends FlatSpec with Matchers with ScalaFutures with
     behavior of "The Consumer with configuration " + propertyFile
     
     it should "asks a provider a question and checks the result" in new ProviderConsumerFixture(propertyFile) {
-      val probe = TestProbe()
-      provider.bind(probe.ref)
+      provider.bind(testActor)
 
-      val response = consumer.ask("hello?")
-      probe.expectMsg(AmqpRequestMessage("hello?", 1))
+      consumer.ask("hello?")
+      expectMsg(AmqpRequestMessage("hello?", 1))
+      
       provider.unbind();
     }
   }
@@ -66,17 +69,17 @@ class ProviderConsumerTest extends FlatSpec with Matchers with ScalaFutures with
     behavior of "The Consumer with configuration " + propertyFile
     
     it should "tells a provider" in new ProviderConsumerFixture(propertyFile) {
-      val probe = TestProbe()
-      provider.bind(probe.ref)
+      provider.bind(testActor)
 
-      val response = consumer.tell("I pity the fool!")
-      probe.expectMsg(AmqpRequestMessage("I pity the fool!", 1))
+      consumer.tell("I pity the fool!")
+      expectMsg(AmqpRequestMessage("I pity the fool!", 1))
+      
       provider.unbind();
     }
   }
 }
 
-class EchoActor extends Actor {
+private class EchoActor extends Actor {
   def receive = {
     case AmqpRequestMessage(body, deliveryTag) => {
       sender ! AmqpResponseMessage(body, deliveryTag)
