@@ -12,8 +12,8 @@ import com.rabbitmq.client.QueueingConsumer
  * 
  * Just a wrapper around [[com.rabbitmq.client.QueueingConsumer]].
  */
-class BlockingMessageConsumer(channel: Channel) extends MessageConsumer {
-  private lazy val consumer = new QueueingConsumer(channel.get)
+class BlockingMessageConsumer(channel: Channel)(implicit fn: Channel => QueueingConsumer) extends MessageConsumer {
+  private lazy val consumer = fn(channel)
   
   override private[driver] def get: RabbitConsumer = consumer
   
@@ -26,4 +26,9 @@ class BlockingMessageConsumer(channel: Channel) extends MessageConsumer {
     
     Delivery(properties, delivery.getBody(), delivery.getEnvelope.getDeliveryTag)
   }
+}
+
+object BlockingMessageConsumer {
+  implicit val QueueingConsumerFactory: Channel => QueueingConsumer =
+    c => new QueueingConsumer(c.get)
 }

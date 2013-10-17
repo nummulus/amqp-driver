@@ -1,6 +1,7 @@
 package com.nummulus.amqp.driver
 
 import com.nummulus.amqp.driver.consumer.BlockingMessageConsumer
+import com.nummulus.amqp.driver.consumer.BlockingMessageConsumer._
 
 import com.rabbitmq.client.{Consumer => RabbitConsumer}
 
