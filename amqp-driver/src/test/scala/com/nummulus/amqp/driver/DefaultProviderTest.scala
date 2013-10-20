@@ -45,6 +45,15 @@ class DefaultProviderTest extends TestKit(ActorSystem("test-system")) with FlatS
     
     verify (channel).basicCancel(anyString)
   }
+  
+  it should "fail when an attempt to re-bind after unbind is made" in new ProviderFixture {
+    provider.bind(testActor)
+    provider.unbind()
+    
+    intercept[IllegalStateException] {
+      provider.bind(testActor)
+    }
+  }
 
   override def afterAll: Unit = {
     TestKit.shutdownActorSystem(system)

@@ -23,11 +23,17 @@ private[driver] class DefaultProvider(channel: Channel, configuration: QueueConf
   channel.basicQos(1)
   
   private var consumerTag: Option[String] = None
+  private var spent: Boolean = false
   
   def bind(actor: ActorRef) {
+    if (spent) {
+      throw new IllegalStateException("Cannot bind the same provider more than once.")
+    }
+    
     val guardianActor = actorSystem.actorOf(Props(classOf[AmqpGuardianActor], actor, channel, configuration), configuration.queue + "Guardian")
     val callback = new AkkaMessageConsumer(channel, guardianActor)
     
+    spent = true
     consumerTag = Some(channel.basicConsume(configuration.queue, configuration.autoAcknowledge, callback))
   }
   
