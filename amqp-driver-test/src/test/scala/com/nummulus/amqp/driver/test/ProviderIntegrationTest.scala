@@ -32,12 +32,4 @@ class ProviderIntegrationTest extends FlatSpec with Matchers {
     
     probe.expectMsg(AmqpRequestMessage("Hi", SomeDeliveryTag))
   }
-  
-  it should "acknowledge messages if auto acknowledge is enabled" in new BoundProviderFixture(true) {
-    sendMessage(SomeDeliveryTag, "Hi")
-    
-    Thread.sleep(500)
-    
-    verify (channel).basicAck(SomeDeliveryTag, false)
-  }
 }
