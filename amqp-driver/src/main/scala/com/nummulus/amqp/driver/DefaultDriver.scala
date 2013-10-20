@@ -5,6 +5,7 @@ import com.nummulus.amqp.driver.configuration.ConfigurationException
 import com.nummulus.amqp.driver.configuration.QueueConfiguration
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigException
+import com.nummulus.amqp.driver.configuration.QueueConfigurer
 
 /**
  * Default driver implementation.
@@ -13,7 +14,7 @@ import com.typesafe.config.ConfigException
  * established if a consumer is created. Every consumer will get a separate
  * channel.
  */
-private[driver] class DefaultDriver(connectionFactory: ConnectionFactory, config: Config) extends AmqpDriver {
+private[driver] class DefaultDriver(connectionFactory: ConnectionFactory, config: Config) extends AmqpDriver with QueueConfigurer {
   private val logger = LoggerFactory.getLogger(getClass)
   private val rootConfig = config.getConfig("amqp")
   
@@ -31,7 +32,7 @@ private[driver] class DefaultDriver(connectionFactory: ConnectionFactory, config
    */
   override def newConsumer(service: String, operation: String): AmqpConsumer = {
     logger.info(s"Retrieving configuration for operation '$operation' on service '$service'")
-    val queueConfiguration = getConsumerQueueConfiguration(service, operation)
+    val queueConfiguration = getConsumerQueueConfiguration(rootConfig, service, operation)
     
     val channel = connection.createChannel()
     new DefaultConsumer(channel, queueConfiguration, MessageConsumer.newBlocking(channel))
@@ -46,7 +47,7 @@ private[driver] class DefaultDriver(connectionFactory: ConnectionFactory, config
    */
   override def newProvider(operation: String): AmqpProvider = {
     logger.info(s"Retrieving configuration for operation '$operation'")
-    val queueConfiguration = getProvideQueuerConfiguration(operation)
+    val queueConfiguration = getProvideQueuerConfiguration(rootConfig, operation)
     
     val channel = connection.createChannel()
     new DefaultProvider(channel, queueConfiguration)
@@ -63,48 +64,5 @@ private[driver] class DefaultDriver(connectionFactory: ConnectionFactory, config
     connectionFactory.newConnection()
   }
   
-  /**
-   * Returns the queue configuration of a consumer's service operation.
-   * 
-   * @throws QueueConfiguration if the queue has missing keys in the configuration file
-   */
-  private def getConsumerQueueConfiguration(service: String, operation: String): QueueConfiguration =
-    getQueueConfiguration(operation, s"uses.$service")
-  
-  /**
-   * Returns the queue configuration of a provider's service operation.
-   * 
-   * @throws QueueConfiguration if the queue has missing keys in the configuration file
-   */
-  private def getProvideQueuerConfiguration(operation: String): QueueConfiguration =
-    getQueueConfiguration(operation, "defines")
-  
-  /**
-   * Returns the configuration of the request queue for the specified service
-   * operation.
-   * 
-   * @param operation name of the operation
-   * @param queueRootConfig root of the queues configuration
-   * @throws QueueConfiguration if the queue has missing keys in the configuration file
-   */
-  private def getQueueConfiguration(operation: String, pathToRoot: => String): QueueConfiguration = {
-    try {
-      val queueRootConfig = rootConfig.getConfig(pathToRoot)
-      val operationConfig = queueRootConfig.getConfig(operation)
-      
-      val serviceName = queueRootConfig.getString("serviceName")
-      val operationName = operationConfig.getString("queue")
-      
-      val queue = s"$serviceName.$operationName"
-      
-      QueueConfiguration(
-          queue,
-          operationConfig.getBoolean("durable"),
-          operationConfig.getBoolean("exclusive"),
-          operationConfig.getBoolean("autoDelete"),
-          operationConfig.getBoolean("autoAcknowledge"))
-    } catch {
-      case e: ConfigException => throw new ConfigurationException(e.getMessage(), e)
-    }
-  }
+
 }
