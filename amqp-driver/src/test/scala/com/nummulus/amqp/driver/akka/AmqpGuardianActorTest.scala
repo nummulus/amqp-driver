@@ -14,7 +14,7 @@ import com.nummulus.amqp.driver.MessageProperties
 import com.nummulus.amqp.driver.configuration.QueueConfiguration
 import akka.actor.ActorRef
 import akka.actor.ActorSystem
-import akka.actor.Terminated
+import akka.actor.PoisonPill
 import akka.testkit.TestActorRef
 import akka.testkit.TestKit
 
@@ -78,7 +78,7 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system")) with Fla
   
   it should "ignore responses if the guardian is already terminated" in {
     autoAckGuardian ! someMessage
-    autoAckGuardian ! Terminated
+    testActor ! PoisonPill
     
     reset(channel)
     
@@ -119,7 +119,7 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system")) with Fla
   
   it should "explicitly Nack a message when it receives Terminated" in {
     noAckGuardian ! someMessage
-    noAckGuardian ! Terminated
+    testActor ! PoisonPill
     
     verify (channel, times(1)).basicNack(someDeliveryTag, false, true)
   }
@@ -153,7 +153,7 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system")) with Fla
   
   it should "ignore responses if the guardian is already terminated" in {
     noAckGuardian ! someMessage
-    noAckGuardian ! Terminated
+    testActor ! PoisonPill
     
     reset(channel)
     
