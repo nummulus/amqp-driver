@@ -57,6 +57,9 @@ private[driver] class AmqpGuardianActor(actor: ActorRef, channel: Channel, confi
         unacknowledged -= deliveryTag
         channel.basicAck(deliveryTag, false)
       }
+      else {
+        logger.warn("Did not expect Acknowledge for autoAcknowledge channel (deliveryTag={})", deliveryTag)
+      }
     }
     
     /**
