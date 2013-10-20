@@ -15,5 +15,5 @@ trait AmqpConsumer {
   /**
    * Sends a message without waiting for a response, fire-and-forget semantics.
    */
-  def tell(message: String)
+  def tell(message: String): Unit
 }

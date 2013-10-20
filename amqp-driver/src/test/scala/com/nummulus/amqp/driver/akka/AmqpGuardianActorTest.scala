@@ -165,25 +165,25 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system")) with Fla
   
   
   
-  override def afterAll {
+  override def afterAll: Unit = {
     TestKit.shutdownActorSystem(system)
   }
   
-  private def verifyAcknowledgeNever(deliveryTag: Long) {
+  private def verifyAcknowledgeNever(deliveryTag: Long): Unit = {
     verify (channel, never()).basicAck(deliveryTag, true)
     verify (channel, never()).basicAck(deliveryTag, false)
   }
   
-  private def verifyAcknowledgeOnce(deliveryTag: Long) {
+  private def verifyAcknowledgeOnce(deliveryTag: Long): Unit = {
     verify (channel, times(1)).basicAck(deliveryTag, false)
     verify (channel, never()).basicAck(deliveryTag, true)
   }
   
-  private def verifyPublishNothing() {
+  private def verifyPublishNothing(): Unit = {
     verify (channel, never()).basicPublish(anyString, anyString, any[MessageProperties], any[Array[Byte]])
   }
 
-  private def verifyPublishMessage(replyTo: String, correlationId: String, body: String) {
+  private def verifyPublishMessage(replyTo: String, correlationId: String, body: String): Unit = {
     verify (channel, times(1)).basicPublish("", replyTo, MessageProperties(correlationId = correlationId), body.getBytes)
   }
   
