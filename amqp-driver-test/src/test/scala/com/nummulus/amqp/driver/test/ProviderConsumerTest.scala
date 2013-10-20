@@ -25,10 +25,15 @@ import org.scalatest.OneInstancePerTest
 import com.nummulus.amqp.driver.akka.Acknowledge
 import org.scalatest.FlatSpecLike
 import akka.testkit.TestKit
+import org.scalatest.BeforeAndAfterAll
 
 @RunWith(classOf[JUnitRunner])
 class ProviderConsumerTest extends TestKit(ActorSystem("test-system")) with FlatSpecLike with Matchers 
-  with ScalaFutures with TableDrivenPropertyChecks {
+  with ScalaFutures with TableDrivenPropertyChecks with BeforeAndAfterAll {
+  
+  override def afterAll {
+    TestKit.shutdownActorSystem(system)
+  }
 
   val propertyFiles = Table(("file"),
     ("ProviderConsumer_1.conf"),
