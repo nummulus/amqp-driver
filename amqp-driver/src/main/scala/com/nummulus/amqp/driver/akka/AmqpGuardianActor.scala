@@ -65,7 +65,7 @@ private[driver] class AmqpGuardianActor(actor: ActorRef, channel: Channel, confi
     /**
      * Handles a terminate message from the watched actor by requeueing all unacknowledged messages.
      */
-    case Terminated => {
+    case _: Terminated => {
       unacknowledged foreach (channel.basicNack(_, false, true))
       unanswered = unanswered.empty
     }
