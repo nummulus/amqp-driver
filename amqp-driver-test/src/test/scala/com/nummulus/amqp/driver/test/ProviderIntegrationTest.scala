@@ -25,17 +25,19 @@ import _root_.akka.testkit.TestProbe
 class ProviderIntegrationTest extends FlatSpec with Matchers {
   behavior of "AmqpProvider"
   
+  val SomeDeliveryTag = 1;
+  
   it should "forward a message to the provided actor" in new BoundProviderFixture(true) {
-    sendMessage("Hi")
+    sendMessage(SomeDeliveryTag, "Hi")
     
-    probe.expectMsg(AmqpRequestMessage("Hi", 1))
+    probe.expectMsg(AmqpRequestMessage("Hi", SomeDeliveryTag))
   }
   
   it should "acknowledge messages if auto acknowledge is enabled" in new BoundProviderFixture(true) {
-    sendMessage("Hi")
+    sendMessage(SomeDeliveryTag, "Hi")
     
     Thread.sleep(500)
     
-    verify (channel).basicAck(1, false)
+    verify (channel).basicAck(SomeDeliveryTag, false)
   }
 }

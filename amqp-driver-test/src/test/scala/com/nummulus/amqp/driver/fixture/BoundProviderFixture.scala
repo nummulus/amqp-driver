@@ -39,8 +39,8 @@ class BoundProviderFixture(autoAcknowledge: Boolean) extends MockitoSugar {
   
   val consumer = callbackCaptor.getValue.get
   
-  def sendMessage(body: String) {
-    val envelope = new Envelope(1, false, "", "routing")
+  def sendMessage(deliveryTag: Int, body: String) {
+    val envelope = new Envelope(deliveryTag, false, "", "routing")
     val properties = new BasicProperties().builder.correlationId("1e").build
     consumer.handleDelivery("", envelope, properties, body.getBytes)
   }
