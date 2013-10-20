@@ -1,31 +1,19 @@
 package com.nummulus.amqp.driver.test
 
-import org.scalatest.FunSuite
-import org.scalatest.Matchers
-import org.scalatest.concurrent.Conductors
-import com.nummulus.amqp.driver.AmqpDriver
 import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
-import scala.concurrent.Await
-import scala.concurrent.duration.DurationInt
-import akka.actor.ActorSystem
-import akka.actor.Actor
-import akka.actor.Props
-import akka.testkit.TestProbe
-import com.nummulus.amqp.driver.akka.AmqpRequestMessage
-import com.nummulus.amqp.driver.fixture.ProviderConsumerFixture
-import org.scalatest.FlatSpec
-import org.scalatest.concurrent.Futures
+import org.scalatest.BeforeAndAfterAll
+import org.scalatest.FlatSpecLike
+import org.scalatest.Matchers
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.prop.TableDrivenPropertyChecks
 import com.nummulus.amqp.driver.akka.AmqpRequestMessage
 import com.nummulus.amqp.driver.akka.AmqpResponseMessage
-import org.scalatest.prop.PropertyChecks
-import org.scalatest.prop.TableDrivenPropertyChecks
-import org.scalatest.OneInstancePerTest
-import com.nummulus.amqp.driver.akka.Acknowledge
-import org.scalatest.FlatSpecLike
+import com.nummulus.amqp.driver.fixture.ProviderConsumerFixture
+import akka.actor.Actor
+import akka.actor.ActorSystem
+import akka.actor.Props
 import akka.testkit.TestKit
-import org.scalatest.BeforeAndAfterAll
+import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class ProviderConsumerTest extends TestKit(ActorSystem("test-system")) with FlatSpecLike with Matchers 
