@@ -48,7 +48,7 @@ class ProviderConsumerTest extends TestKit(ActorSystem("test-system")) with Flat
   forAll(propertyFiles) { (propertyFile : String) =>
     behavior of "The Consumer with configuration " + propertyFile
     
-    it should "ask a provider a question and check the result" in new ProviderConsumerFixture(propertyFile) {
+    it should "ask a provider a question that arrives" in new ProviderConsumerFixture(propertyFile) {
       provider.bind(testActor)
 
       consumer.ask("hello?")
@@ -61,7 +61,7 @@ class ProviderConsumerTest extends TestKit(ActorSystem("test-system")) with Flat
   forAll(propertyFiles) { (propertyFile : String) =>
     behavior of "The Consumer with configuration " + propertyFile
     
-    it should "tell a provider" in new ProviderConsumerFixture(propertyFile) {
+    it should "tell a provider a message that arrives" in new ProviderConsumerFixture(propertyFile) {
       provider.bind(testActor)
 
       consumer.tell("I pity the fool!")
