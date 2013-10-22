@@ -76,6 +76,13 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system")) with Fla
     verifyPublishNothing()
   }
   
+  it should "ignore messages if the guardian is already terminated" in {
+    testActor ! PoisonPill
+    autoAckGuardian ! someMessage
+
+    expectNoMsg()
+  }
+  
   it should "ignore responses if the guardian is already terminated" in {
     autoAckGuardian ! someMessage
     testActor ! PoisonPill
@@ -160,6 +167,13 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system")) with Fla
     verifyPublishNothing()
   }
   
+  it should "ignore messages if the guardian is already terminated" in {
+    testActor ! PoisonPill
+    noAckGuardian ! someMessage
+    
+    expectNoMsg()
+  }
+  
   it should "ignore responses if the guardian is already terminated" in {
     noAckGuardian ! someMessage
     testActor ! PoisonPill
@@ -168,7 +182,7 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system")) with Fla
     
     noAckGuardian ! someResponse
 
-    verifyAcknowledgeOnce(someDeliveryTag)
+    verifyAcknowledgeNever(someDeliveryTag)
     verifyPublishNothing()
   }
   
