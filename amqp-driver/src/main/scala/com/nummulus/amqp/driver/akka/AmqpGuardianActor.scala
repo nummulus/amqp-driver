@@ -47,6 +47,9 @@ private[driver] class AmqpGuardianActor(actor: ActorRef, channel: Channel, confi
         
         channel.basicPublish("", requestProperties.replyTo, responseProperties, message.getBytes)
       }
+      else {
+        logger.warn("Did not expect Response for deliveryTag {}: message was either fire-and-forget or already responded to", deliveryTag)
+      }
     }
     
     /**
