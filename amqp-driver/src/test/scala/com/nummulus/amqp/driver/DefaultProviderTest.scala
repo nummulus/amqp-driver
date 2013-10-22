@@ -10,6 +10,7 @@ import com.nummulus.amqp.driver.fixture.ProviderFixture
 import com.nummulus.amqp.driver.matcher.TypeMatcher
 import com.nummulus.amqp.driver.provider.AkkaMessageConsumer
 import _root_.akka.actor.ActorSystem
+import _root_.akka.actor.PoisonPill
 import _root_.akka.testkit.TestProbe
 import _root_.akka.testkit.TestKit
 
@@ -32,6 +33,7 @@ class DefaultProviderTest extends TestKit(ActorSystem("test-system")) with FlatS
     val autoAcknowledgeCaptor = ArgumentCaptor.forClass(classOf[Boolean])
     val callbackCaptor = ArgumentCaptor.forClass(classOf[MessageConsumer])
     
+    waitAMoment()
     verify (channel).basicConsume(queueCaptor.capture(), autoAcknowledgeCaptor.capture(), callbackCaptor.capture())
     
     queueCaptor.getValue should be ("requestQueue")
@@ -43,6 +45,15 @@ class DefaultProviderTest extends TestKit(ActorSystem("test-system")) with FlatS
     provider.bind(testActor)
     provider.unbind()
     
+    waitAMoment()
+    verify (channel).basicCancel(anyString)
+  }
+  
+  it should "not receive messages after the actor's death" in new ProviderFixture {
+    provider.bind(testActor)
+    testActor ! PoisonPill
+
+    waitAMoment()
     verify (channel).basicCancel(anyString)
   }
   
@@ -55,6 +66,10 @@ class DefaultProviderTest extends TestKit(ActorSystem("test-system")) with FlatS
     }
   }
 
+  private def waitAMoment(): Unit = {
+    Thread.sleep(500)
+  }
+  
   override def afterAll: Unit = {
     TestKit.shutdownActorSystem(system)
   }
