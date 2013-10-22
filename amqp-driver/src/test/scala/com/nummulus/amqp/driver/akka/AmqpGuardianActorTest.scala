@@ -107,6 +107,14 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system")) with Fla
     verifyAcknowledgeOnce(someDeliveryTag)
   }
   
+  it should "not acknowledge twice" in {
+    noAckGuardian ! someMessage
+    noAckGuardian ! Acknowledge(someDeliveryTag)
+    noAckGuardian ! Acknowledge(someDeliveryTag)
+    
+    verifyAcknowledgeOnce(someDeliveryTag)
+  }
+  
   it should "not acknowledge to the channel when the wrong delivery tag is acknowledged" in {
     val anotherDeliveryTag = someDeliveryTag + 1
 
@@ -114,7 +122,7 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system")) with Fla
     noAckGuardian ! Acknowledge(anotherDeliveryTag)
 
     verifyAcknowledgeNever(someDeliveryTag)
-    verifyAcknowledgeOnce(anotherDeliveryTag)
+    verifyAcknowledgeNever(anotherDeliveryTag)
   }
   
   it should "explicitly Nack a message when it receives Terminated" in {
@@ -135,7 +143,7 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system")) with Fla
   it should "ignore a response to an unknown message" in {
     noAckGuardian ! someResponse
     
-    verifyAcknowledgeOnce(someDeliveryTag)
+    verifyAcknowledgeNever(someDeliveryTag)
     verifyPublishNothing()
   }
   
@@ -143,11 +151,12 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system")) with Fla
     noAckGuardian ! someMessage
     noAckGuardian ! someResponse
     
+    verifyAcknowledgeOnce(someDeliveryTag)
     reset(channel)
     
     noAckGuardian ! someResponse
     
-    verifyAcknowledgeOnce(someDeliveryTag)
+    verifyAcknowledgeNever(someDeliveryTag)
     verifyPublishNothing()
   }
   

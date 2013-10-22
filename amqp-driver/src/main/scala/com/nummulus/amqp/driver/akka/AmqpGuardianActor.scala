@@ -57,8 +57,13 @@ private[driver] class AmqpGuardianActor(actor: ActorRef, channel: Channel, confi
      */
     case Acknowledge(deliveryTag) => {
       if (!autoAcknowledge) {
-        unacknowledged -= deliveryTag
-        channel.basicAck(deliveryTag, false)
+        if (unacknowledged contains deliveryTag) {
+          unacknowledged -= deliveryTag
+          channel.basicAck(deliveryTag, false)
+        }
+        else {
+          logger.warn("Message with deliveryTag {} was already acknowledged", deliveryTag)
+        }
       }
       else {
         logger.warn("Did not expect Acknowledge for autoAcknowledge channel (deliveryTag={})", deliveryTag)
