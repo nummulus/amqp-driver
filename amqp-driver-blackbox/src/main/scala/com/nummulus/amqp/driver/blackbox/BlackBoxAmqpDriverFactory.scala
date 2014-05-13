@@ -1,9 +1,10 @@
 package com.nummulus.amqp.driver.blackbox
 
 import com.nummulus.amqp.driver.AmqpDriverFactory
+import akka.actor.ActorSystem
 
-object BlackBoxAmqpDriverFactory extends AmqpDriverFactory {
-  private val driver = new BlackBoxAmqpDriver
+class BlackBoxAmqpDriverFactory(system: ActorSystem) extends AmqpDriverFactory {
+  private val driver = new BlackBoxAmqpDriver(system)
   
   /**
    * Returns the singleton black box driver.

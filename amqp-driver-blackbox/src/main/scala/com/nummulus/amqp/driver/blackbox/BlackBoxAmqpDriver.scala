@@ -3,8 +3,9 @@ package com.nummulus.amqp.driver.blackbox
 import com.nummulus.amqp.driver.AmqpConsumer
 import com.nummulus.amqp.driver.AmqpDriver
 import com.nummulus.amqp.driver.AmqpProvider
+import akka.actor.ActorSystem
 
-class BlackBoxAmqpDriver extends AmqpDriver {
+class BlackBoxAmqpDriver(system: ActorSystem) extends AmqpDriver {
   private val providerConsumer = new BlackBoxAmqpProviderConsumer
   
   /**
