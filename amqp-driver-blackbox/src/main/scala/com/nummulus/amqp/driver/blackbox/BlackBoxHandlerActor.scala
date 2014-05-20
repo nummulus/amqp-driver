@@ -9,9 +9,10 @@ import com.nummulus.amqp.driver.akka.AmqpRequestMessage
 import com.nummulus.amqp.driver.akka.AmqpResponseMessage
 
 import akka.actor.Actor
+import akka.actor.ActorLogging
 import akka.actor.ActorRef
 
-private[blackbox] class BlackBoxHandlerActor(actor: ActorRef) extends Actor {
+private[blackbox] class BlackBoxHandlerActor(actor: ActorRef) extends Actor with ActorLogging {
   private var unanswered = Map.empty[Long, Promise[String]]
   private val tag = new AtomicLong(0)
 
@@ -29,8 +30,8 @@ private[blackbox] class BlackBoxHandlerActor(actor: ActorRef) extends Actor {
         unanswered -= deliveryTag
         promise.complete(Success(body))
       case None =>
+        log.error(s"Unknown deliveryTag $deliveryTag (with message $body)")
         context.stop(self)
-        throw new IllegalStateException(s"Unknown deliveryTag $deliveryTag (with message $body)")
     }
   }
 }
