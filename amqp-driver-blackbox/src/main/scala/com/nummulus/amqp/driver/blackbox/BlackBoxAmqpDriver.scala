@@ -6,7 +6,7 @@ import com.nummulus.amqp.driver.AmqpProvider
 import akka.actor.ActorSystem
 
 class BlackBoxAmqpDriver(system: ActorSystem) extends AmqpDriver {
-  private val providerConsumer = new BlackBoxAmqpProviderConsumer
+  private val providerConsumer = new BlackBoxAmqpProviderConsumer(system)
   
   /**
    * Returns the singleton black box consumer, regardless of service and operation.
