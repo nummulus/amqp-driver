@@ -60,6 +60,20 @@ class BlackBoxAmqpProviderConsumerTest extends TestKit(ActorSystem("test-system"
     whenReady(f) { _ should be (SomeAnswer) }
   }
   
+  ignore should "crash when two replies are sent" in {
+    pc.bind(probe.ref)
+    
+    pc.ask(SomeMessage)
+    
+    probe.expectMsgPF() {
+      case AmqpRequestMessage(SomeMessage, tag) =>
+        probe.sender ! AmqpResponseMessage(SomeAnswer, tag)
+        probe.sender ! AmqpResponseMessage(SomeAnswer, tag)
+    }
+    
+    // assert that the driver has shut down
+  }
+  
   
   behavior of "bind"
   
