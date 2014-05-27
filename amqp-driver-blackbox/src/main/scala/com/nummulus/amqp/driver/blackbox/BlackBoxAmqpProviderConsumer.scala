@@ -21,9 +21,12 @@ class BlackBoxAmqpProviderConsumer(system: ActorSystem) extends AmqpProvider wit
    * Activates the black box provider. All messages that appear on the queue
    * are wrapped in an AmqpRequestMessage and sent to [[actor]].
    */
-  def bind(actor: ActorRef): Unit = {
-    val props = Props(classOf[BlackBoxHandlerActor], actor)
-    handler = Some(system.actorOf(props))
+  def bind(actor: ActorRef): Unit = handler match {
+    case None =>
+      val props = Props(classOf[BlackBoxHandlerActor], actor)
+      handler = Some(system.actorOf(props))
+    case Some(_) =>
+      throw new IllegalStateException("An actor was already bound to AmqpDriver")
   }
 
   /**
