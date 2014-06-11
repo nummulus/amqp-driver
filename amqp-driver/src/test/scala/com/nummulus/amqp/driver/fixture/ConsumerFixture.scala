@@ -13,7 +13,8 @@ trait ConsumerFixture extends MockitoSugar {
   val channel = mock[Channel]
   val declareOk = mock[QueueDeclareOk]
   val messageConsumer = mock[BlockingMessageConsumer]
-  val correlationIdGenerator = () => "4"
+  val someCorrelationId = "4"
+  val correlationIdGenerator = () => someCorrelationId
   
   when (channel.queueDeclare) thenReturn declareOk
   when (channel.queueDeclare("requestQueue", true, false, false, null)) thenReturn declareOk

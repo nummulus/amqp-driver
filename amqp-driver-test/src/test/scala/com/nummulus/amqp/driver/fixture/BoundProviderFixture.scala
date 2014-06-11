@@ -2,6 +2,7 @@ package com.nummulus.amqp.driver.fixture
 
 import org.mockito.ArgumentCaptor
 import org.mockito.Mockito._
+import org.mockito.Matchers._
 import org.scalatest.mock.MockitoSugar
 
 import com.nummulus.amqp.driver.Channel
@@ -35,7 +36,7 @@ class BoundProviderFixture(autoAcknowledge: Boolean) extends MockitoSugar {
   val autoAcknowledgeCaptor = ArgumentCaptor.forClass(classOf[Boolean])
   val callbackCaptor = ArgumentCaptor.forClass(classOf[MessageConsumer])
   
-  verify (channel).basicConsume(queueCaptor.capture(), autoAcknowledgeCaptor.capture(), callbackCaptor.capture())
+  verify (channel).basicConsume(queueCaptor.capture(), autoAcknowledgeCaptor.capture(), anyString(), callbackCaptor.capture())
   
   val consumer = callbackCaptor.getValue.get
   

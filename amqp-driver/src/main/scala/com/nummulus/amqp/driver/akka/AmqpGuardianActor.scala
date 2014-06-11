@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory
  * Monitors the actor which it sends messages to. If the monitored actor dies,
  * all unacknowledged messages will be requeued.
  */
-private[driver] class AmqpGuardianActor(actor: ActorRef, channel: Channel, configuration: QueueConfiguration) extends Actor {
+private[driver] class AmqpGuardianActor(actor: ActorRef, channel: Channel, consumerTag: String, configuration: QueueConfiguration) extends Actor {
   private val logger = LoggerFactory.getLogger(getClass)
   private var unacknowledged = Set[Long]()
   private var unanswered = Map[Long, MessageProperties]()
@@ -76,6 +76,7 @@ private[driver] class AmqpGuardianActor(actor: ActorRef, channel: Channel, confi
     case _: Terminated => {
       unacknowledged foreach (channel.basicNack(_, false, true))
       unanswered = unanswered.empty
+      channel.basicCancel(consumerTag)
     }
     
     case x => {

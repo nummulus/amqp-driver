@@ -38,8 +38,8 @@ class Channel(channel: RabbitChannel) {
     new QueueDeclareOk(channel.queueDeclare(queue, durable, exclusive, autoDelete, queueArgs))
   }
   
-  def basicConsume(queue: String, autoAcknowledge: Boolean, callback: MessageConsumer): String =
-    channel.basicConsume(queue, autoAcknowledge, callback.get)
+  def basicConsume(queue: String, autoAcknowledge: Boolean, consumerTag: String, callback: MessageConsumer): String =
+    channel.basicConsume(queue, autoAcknowledge, consumerTag, callback.get)
   
   def basicPublish(exchange: String, routingKey: String, properties: MessageProperties, body: Array[Byte]) {
     import scala.collection.JavaConversions._

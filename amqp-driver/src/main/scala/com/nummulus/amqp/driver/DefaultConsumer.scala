@@ -31,7 +31,7 @@ private[driver] class DefaultConsumer(
   private val requestQueue = channel.queueDeclare(configuration.queue, configuration.durable, configuration.exclusive, configuration.autoDelete, null)
   logger.debug("Declared request queue: {}", requestQueue.getQueue)
   
-  channel.basicConsume(responseQueue, configuration.autoAcknowledge, callback)
+  channel.basicConsume(responseQueue, configuration.autoAcknowledge, generateId(), callback)
   
   /**
    * Sends a message asynchronously and returns a [[scala.concurrent.Future]]

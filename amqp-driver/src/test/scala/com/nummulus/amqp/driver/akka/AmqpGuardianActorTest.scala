@@ -200,7 +200,7 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system")) with Fla
     val name = if (autoAcknowledge) "AutoAckTestGuardian" else "NoAckTestGuardian"
     val configuration = mock[QueueConfiguration]
     when (configuration.autoAcknowledge) thenReturn autoAcknowledge
-    TestActorRef(new AmqpGuardianActor(testActor, channel, configuration))
+    TestActorRef(new AmqpGuardianActor(testActor, channel, "some-unique-id-string", configuration))
   }
   
   private def createMessage(messageBody: String = someMessageBody, correlationId: String = someCorrelationId, replyTo: String = someReplyTo, deliveryTag: Long = someDeliveryTag): AmqpRequestMessageWithProperties =
