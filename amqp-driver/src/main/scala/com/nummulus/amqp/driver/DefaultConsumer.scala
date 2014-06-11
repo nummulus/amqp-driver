@@ -1,20 +1,28 @@
 package com.nummulus.amqp.driver
 
+import java.nio.charset.StandardCharsets
+
 import scala.annotation.tailrec
 import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+
 import org.slf4j.LoggerFactory
+
 import com.nummulus.amqp.driver.configuration.QueueConfiguration
 import com.nummulus.amqp.driver.consumer.BlockingMessageConsumer
-import com.nummulus.amqp.driver.consumer.CorrelationIdGenerator
-import com.nummulus.amqp.driver.consumer.RandomCorrelationIdGenerator
-import java.nio.charset.StandardCharsets
+
+import IdGenerators._
 
 /**
  * Default consumer implementation.
  */
-private[driver] class DefaultConsumer(channel: Channel, configuration: QueueConfiguration, callback: BlockingMessageConsumer, correlationIdGenerator: CorrelationIdGenerator = new RandomCorrelationIdGenerator) extends AmqpConsumer {
+private[driver] class DefaultConsumer(
+    channel: Channel,
+    configuration: QueueConfiguration,
+    callback: BlockingMessageConsumer,
+    generateId: IdGenerator = IdGenerators.random) extends AmqpConsumer {
+  
   private val logger = LoggerFactory.getLogger(getClass)
   
   private val responseQueue = channel.queueDeclare.getQueue
@@ -32,7 +40,7 @@ private[driver] class DefaultConsumer(channel: Channel, configuration: QueueConf
    * Will listen indefinitely on the response queue until a response arrives.
    */
   override def ask(message: String): Future[String] = {
-    val correlationId = correlationIdGenerator.generate
+    val correlationId = generateId()
     
     val properties = MessageProperties(
         correlationId = correlationId,
