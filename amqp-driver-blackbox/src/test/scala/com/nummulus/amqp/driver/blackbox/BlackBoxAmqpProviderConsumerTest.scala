@@ -71,7 +71,7 @@ class BlackBoxAmqpProviderConsumerTest extends TestKit(ActorSystem("test-system"
         probe.sender ! AmqpResponseMessage(SomeAnswer, tag)
     }
     
-    // assert that the driver has shut down
+    // TODO: assert that the driver has shut down
   }
   
   
