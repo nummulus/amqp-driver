@@ -85,6 +85,10 @@ class BlackBoxAmqpProviderConsumerTest extends TestKit(ActorSystem("test-system"
   
   behavior of "unbind"
   
+  it should "throw when no actor is bound" in {
+    an [IllegalStateException] should be thrownBy pc.unbind()
+  }
+  
   it should "make the BlackBoxProviderConsumer unusable for tell" in {
     pc.bind(probe.ref)
     pc.unbind()
