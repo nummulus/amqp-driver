@@ -15,7 +15,7 @@
 		<dependency>
 			<groupId>com.nummulus.amqp.driver</groupId>
 			<artifactId>amqp-driver</artifactId>
-			<version>0.1.0-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
 		
 		<!-- Test dependencies -->
