@@ -25,20 +25,3 @@ trait AmqpDriver {
    */
   def newProvider(operation: String): AmqpProvider
 }
-
-/**
- * Factory for the AMQP driver.
- */
-object AmqpDriver {
-  private val connectionFactory = new ConnectionFactory(new RabbitConnectionFactory)
-  
-  /**
-   * Returns a new driver with the configuration loaded from "application.conf".
-   */
-  def apply: AmqpDriver = new DefaultDriver(connectionFactory, ConfigFactory.load)
-  
-  /**
-   * Returns a new driver with the configuration loaded from the specified configuration file.
-   */
-  def apply(configFileName: String): AmqpDriver = new DefaultDriver(connectionFactory, ConfigFactory.load(configFileName)) 
-}
