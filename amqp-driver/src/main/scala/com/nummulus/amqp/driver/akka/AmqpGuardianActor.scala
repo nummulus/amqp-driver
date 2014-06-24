@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory
  * Monitors the actor which it sends messages to. If the monitored actor dies,
  * all unacknowledged messages will be requeued.
  */
-private[driver] class AmqpGuardianActor(actor: ActorRef, channel: Channel, configuration: QueueConfiguration) extends Actor {
+private[driver] class AmqpGuardianActor(actor: ActorRef, channel: Channel, consumerTag: String, configuration: QueueConfiguration) extends Actor {
   private val logger = LoggerFactory.getLogger(getClass)
   private var unacknowledged = Set[Long]()
   private var unanswered = Map[Long, MessageProperties]()
@@ -47,6 +47,9 @@ private[driver] class AmqpGuardianActor(actor: ActorRef, channel: Channel, confi
         
         channel.basicPublish("", requestProperties.replyTo, responseProperties, message.getBytes)
       }
+      else {
+        logger.warn("Did not expect Response for deliveryTag {}: message was either fire-and-forget or already responded to", deliveryTag)
+      }
     }
     
     /**
@@ -54,8 +57,13 @@ private[driver] class AmqpGuardianActor(actor: ActorRef, channel: Channel, confi
      */
     case Acknowledge(deliveryTag) => {
       if (!autoAcknowledge) {
-        unacknowledged -= deliveryTag
-        channel.basicAck(deliveryTag, false)
+        if (unacknowledged contains deliveryTag) {
+          unacknowledged -= deliveryTag
+          channel.basicAck(deliveryTag, false)
+        }
+        else {
+          logger.warn("Message with deliveryTag {} was already acknowledged", deliveryTag)
+        }
       }
       else {
         logger.warn("Did not expect Acknowledge for autoAcknowledge channel (deliveryTag={})", deliveryTag)
@@ -68,6 +76,7 @@ private[driver] class AmqpGuardianActor(actor: ActorRef, channel: Channel, confi
     case _: Terminated => {
       unacknowledged foreach (channel.basicNack(_, false, true))
       unanswered = unanswered.empty
+      channel.basicCancel(consumerTag)
     }
     
     case x => {

@@ -39,7 +39,7 @@ class DefaultConsumerTestForAsk extends FlatSpec with Matchers with MockitoSugar
   }
   
   it should "publish a message and receive a response" in new ConsumerFixture {
-    val properties = MessageProperties(correlationId = "4")
+    val properties = MessageProperties(correlationId = someCorrelationId)
     when (messageConsumer.nextDelivery) thenReturn Delivery(properties, "Gromit".getBytes, 1337)
     
     val response = consumer.ask("Cheese")

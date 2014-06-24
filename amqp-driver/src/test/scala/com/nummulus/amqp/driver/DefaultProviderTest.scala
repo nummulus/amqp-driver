@@ -32,7 +32,7 @@ class DefaultProviderTest extends TestKit(ActorSystem("test-system")) with FlatS
     val autoAcknowledgeCaptor = ArgumentCaptor.forClass(classOf[Boolean])
     val callbackCaptor = ArgumentCaptor.forClass(classOf[MessageConsumer])
     
-    verify (channel).basicConsume(queueCaptor.capture(), autoAcknowledgeCaptor.capture(), callbackCaptor.capture())
+    verify (channel).basicConsume(queueCaptor.capture(), autoAcknowledgeCaptor.capture(), anyString(), callbackCaptor.capture())
     
     queueCaptor.getValue should be ("requestQueue")
     autoAcknowledgeCaptor.getValue should be (true)
