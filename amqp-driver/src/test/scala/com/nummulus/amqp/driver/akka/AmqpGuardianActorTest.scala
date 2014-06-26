@@ -9,16 +9,19 @@ import org.scalatest.Matchers
 import org.scalatest.OneInstancePerTest
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar
+
 import com.nummulus.amqp.driver.Channel
 import com.nummulus.amqp.driver.MessageProperties
 import com.nummulus.amqp.driver.configuration.QueueConfiguration
+
+import AmqpGuardianActorScope._
 import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.PoisonPill
 import akka.testkit.TestActorRef
 import akka.testkit.TestKit
 
-@RunWith(classOf[JUnitRunner])
+@RunWith(classOf[org.scalatest.junit.JUnitRunner])
 class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system")) with FlatSpecLike with Matchers
     with MockitoSugar with BeforeAndAfterAll with OneInstancePerTest {
   
@@ -200,7 +203,9 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system")) with Fla
     val name = if (autoAcknowledge) "AutoAckTestGuardian" else "NoAckTestGuardian"
     val configuration = mock[QueueConfiguration]
     when (configuration.autoAcknowledge) thenReturn autoAcknowledge
-    TestActorRef(new AmqpGuardianActor(testActor, channel, "some-unique-id-string", configuration))
+    val guardian = TestActorRef(new AmqpGuardianActor(channel, "some-unique-id-string", configuration))
+    guardian ! Initialize(testActor)
+    guardian
   }
   
   private def createMessage(messageBody: String = someMessageBody, correlationId: String = someCorrelationId, replyTo: String = someReplyTo, deliveryTag: Long = someDeliveryTag): AmqpRequestMessageWithProperties =

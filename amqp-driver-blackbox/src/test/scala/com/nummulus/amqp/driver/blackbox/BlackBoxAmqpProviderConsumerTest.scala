@@ -6,13 +6,12 @@ import org.scalatest.FlatSpecLike
 import org.scalatest.Matchers
 import org.scalatest.OneInstancePerTest
 import org.scalatest.concurrent.ScalaFutures
-
 import com.nummulus.amqp.driver.akka.AmqpRequestMessage
 import com.nummulus.amqp.driver.akka.AmqpResponseMessage
-
 import akka.actor.ActorSystem
 import akka.testkit.TestKit
 import akka.testkit.TestProbe
+import com.nummulus.amqp.driver.AmqpProvider
 
 @RunWith(classOf[org.scalatest.junit.JUnitRunner])
 class BlackBoxAmqpProviderConsumerTest extends TestKit(ActorSystem("test-system"))
@@ -80,6 +79,18 @@ class BlackBoxAmqpProviderConsumerTest extends TestKit(ActorSystem("test-system"
   it should "throw when a second actor is bound" in {
     pc.bind(probe.ref)
     an [IllegalStateException] should be thrownBy pc.bind(probe.ref)
+  }
+  
+  it should "bind to an actor created by a callback function" in {
+    var factoryCalled = false
+    val factory: AmqpProvider.ActorFactory = sender => {
+      factoryCalled = true
+      testActor
+    }
+    
+    pc.bind(factory)
+    
+    factoryCalled should be (true)
   }
   
   

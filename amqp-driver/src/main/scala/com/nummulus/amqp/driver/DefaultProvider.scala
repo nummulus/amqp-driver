@@ -1,13 +1,16 @@
 package com.nummulus.amqp.driver
 
 import org.slf4j.LoggerFactory
-import com.nummulus.amqp.driver.akka.AmqpGuardianActor
+
+import com.nummulus.amqp.driver.akka.AmqpGuardianActorScope._
 import com.nummulus.amqp.driver.configuration.QueueConfiguration
 import com.nummulus.amqp.driver.provider.AkkaMessageConsumer
+
+import AmqpProvider._
+import IdGenerators._
 import _root_.akka.actor.ActorRef
 import _root_.akka.actor.ActorSystem
 import _root_.akka.actor.Props
-import IdGenerators._
 
 /**
  * Default provider implementation.
@@ -28,21 +31,27 @@ private[driver] class DefaultProvider(
   private var consumerTag: Option[String] = None
   private var spent: Boolean = false
   
-  def bind(actor: ActorRef) {
+  def bind(actor: ActorRef): Unit = {
+    bind(_ => actor)
+  }
+  
+  def bind(createActor: ActorFactory): Unit = {
     if (spent) {
       throw new IllegalStateException("Cannot bind the same provider more than once.")
     }
     
     val tag = generateId()
-    val guardianActor = actorSystem.actorOf(Props(classOf[AmqpGuardianActor], actor, channel, tag, configuration), configuration.queue + "Guardian")
+    val guardianActor = actorSystem.actorOf(Props(classOf[AmqpGuardianActor], channel, tag, configuration), configuration.queue + "Guardian")
     val callback = new AkkaMessageConsumer(channel, guardianActor)
+    val actor = createActor(guardianActor)
+    guardianActor ! Initialize(actor)
     
     spent = true
     consumerTag = Some(tag)
     channel.basicConsume(configuration.queue, configuration.autoAcknowledge, tag, callback)
   }
   
-  def unbind() {
+  def unbind(): Unit = {
     consumerTag foreach { t => channel.basicCancel(t) }
   }
 }
