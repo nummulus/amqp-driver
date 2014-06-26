@@ -39,10 +39,10 @@ class BlackBoxAmqpProviderConsumer(system: ActorSystem) extends AmqpProvider wit
    * Unbinds the actor from the black box provider, and de-activates it.
    */
   def unbind(): Unit = handler match {
-    case None => noActorBound
     case Some(h) =>
       system.stop(h)
       handler = None
+    case None => noActorBound
   }
   
   /**
@@ -50,19 +50,19 @@ class BlackBoxAmqpProviderConsumer(system: ActorSystem) extends AmqpProvider wit
    * holding the eventual response.
    */
   def ask(message: String): Future[String] = handler match {
-    case None => noActorBound
     case Some(h) =>
       val promise = Promise[String]()
       h ! AskMessage(message, promise)
       promise.future
+    case None => noActorBound
   }
   
   /**
    * Sends a message without waiting for a response, fire-and-forget semantics.
    */
   def tell(message: String): Unit = handler match {
-    case None => noActorBound
     case Some(h) => h ! TellMessage(message)
+    case None => noActorBound
   }
   
   private def noActorBound: Nothing =
