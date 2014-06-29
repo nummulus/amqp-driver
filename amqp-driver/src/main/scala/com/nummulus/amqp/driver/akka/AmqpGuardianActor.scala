@@ -15,7 +15,9 @@ import org.slf4j.LoggerFactory
  * all unacknowledged messages will be requeued.
  */
 private[driver] object AmqpGuardianActorScope {
+  
   case class Initialize(actor: ActorRef)
+  case object InitializationComplete
 
   class AmqpGuardianActor(channel: Channel, consumerTag: String, configuration: QueueConfiguration) extends Actor {
     private val logger = LoggerFactory.getLogger(getClass)
@@ -27,6 +29,7 @@ private[driver] object AmqpGuardianActorScope {
       case Initialize(actor) =>
         context.become(active(actor))
         context.watch(actor)
+        sender ! InitializationComplete
     }
 
     private def active(actor: ActorRef): Receive = {
