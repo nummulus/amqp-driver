@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory
  * all unacknowledged messages will be requeued.
  */
 private[driver] object AmqpGuardianActorScope {
-
   case class Initialize(actor: ActorRef)
 
   class AmqpGuardianActor(channel: Channel, consumerTag: String, configuration: QueueConfiguration) extends Actor {

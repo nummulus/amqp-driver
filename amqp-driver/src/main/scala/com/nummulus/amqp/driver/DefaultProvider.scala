@@ -31,9 +31,7 @@ private[driver] class DefaultProvider(
   private var consumerTag: Option[String] = None
   private var spent: Boolean = false
   
-  def bind(actor: ActorRef): Unit = {
-    bind(_ => actor)
-  }
+  def bind(actor: ActorRef): Unit = bind(_ => actor)
   
   def bind(createActor: ActorFactory): Unit = {
     if (spent) {
@@ -51,7 +49,5 @@ private[driver] class DefaultProvider(
     channel.basicConsume(configuration.queue, configuration.autoAcknowledge, tag, callback)
   }
   
-  def unbind(): Unit = {
-    consumerTag foreach { t => channel.basicCancel(t) }
-  }
+  def unbind(): Unit = consumerTag foreach { t => channel.basicCancel(t) }
 }
