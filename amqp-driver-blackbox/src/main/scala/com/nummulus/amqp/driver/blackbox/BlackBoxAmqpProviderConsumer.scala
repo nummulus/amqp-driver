@@ -22,7 +22,7 @@ class BlackBoxAmqpProviderConsumer(system: ActorSystem) extends AmqpProvider wit
   
   /**
    * Activates the black box provider using an actor created by the actor factory.
-   * All messages that appear on the queue are wrapped in an AmqpRequestMessage and sent to [[actor]].
+   * All messages that appear on the queue are wrapped in an AmqpRequestMessage and sent to that actor.
    */
   def bind(createActor: ActorFactory): Unit = handler match {
     case None =>
