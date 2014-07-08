@@ -12,7 +12,7 @@ object DefaultAmqpDriverFactory extends AmqpDriverFactory {
   /**
    * Returns a new driver with the configuration loaded from "application.conf".
    */
-  def apply: AmqpDriver = new DefaultDriver(connectionFactory, ConfigFactory.load)
+  def apply(): AmqpDriver = new DefaultDriver(connectionFactory, ConfigFactory.load)
   
   /**
    * Returns a new driver with the configuration loaded from the specified configuration file.

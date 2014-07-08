@@ -1,5 +1,7 @@
 package com.nummulus.amqp.driver.akka
 
+import scala.concurrent.duration._
+
 import org.junit.runner.RunWith
 import org.mockito.Matchers._
 import org.mockito.Mockito._
@@ -7,20 +9,24 @@ import org.scalatest.BeforeAndAfterAll
 import org.scalatest.FlatSpecLike
 import org.scalatest.Matchers
 import org.scalatest.OneInstancePerTest
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
+
 import com.nummulus.amqp.driver.Channel
 import com.nummulus.amqp.driver.MessageProperties
 import com.nummulus.amqp.driver.configuration.QueueConfiguration
+
+import AmqpGuardianActorScope._
 import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.PoisonPill
 import akka.testkit.TestActorRef
 import akka.testkit.TestKit
+import akka.util.Timeout
 
-@RunWith(classOf[JUnitRunner])
+@RunWith(classOf[org.scalatest.junit.JUnitRunner])
 class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system")) with FlatSpecLike with Matchers
-    with MockitoSugar with BeforeAndAfterAll with OneInstancePerTest {
+    with MockitoSugar with BeforeAndAfterAll with OneInstancePerTest with ScalaFutures {
   
   val channel = mock[Channel]
   var ackCount = 0
@@ -35,9 +41,20 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system")) with Fla
   
   
   
+  behavior of "Initialization"
+  
+  it should "return an InitializationComplete message" in {
+    import _root_.akka.pattern.ask
+    val guardian = createGuardian(true)
+    val future = (guardian ? Initialize(testActor))(Timeout(2.seconds))
+    future.futureValue should be (InitializationComplete)
+  }
+  
+  
+  
   behavior of "AmqpGuardianActor with AutoAcknowledge"
 
-  val autoAckGuardian = createGuardian(true)
+  val autoAckGuardian = createInitializedGuardian(true)
   
   it should "pass on a message that appears on the channel" in {
     autoAckGuardian ! someMessage
@@ -91,7 +108,7 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system")) with Fla
   
   behavior of "AmqpGuardianActor without AutoAcknowledge"
 
-  val noAckGuardian = createGuardian(false)
+  val noAckGuardian = createInitializedGuardian(false)
   
   it should "pass on a message that appears on the channel" in {
     noAckGuardian ! someMessage
@@ -200,7 +217,13 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system")) with Fla
     val name = if (autoAcknowledge) "AutoAckTestGuardian" else "NoAckTestGuardian"
     val configuration = mock[QueueConfiguration]
     when (configuration.autoAcknowledge) thenReturn autoAcknowledge
-    TestActorRef(new AmqpGuardianActor(testActor, channel, "some-unique-id-string", configuration))
+    TestActorRef(new AmqpGuardianActor(channel, "some-unique-id-string", configuration))
+  }
+  
+  private def createInitializedGuardian(autoAcknowledge: Boolean): ActorRef = {
+    val guardian = createGuardian(autoAcknowledge)
+    guardian ! Initialize(testActor)
+    guardian
   }
   
   private def createMessage(messageBody: String = someMessageBody, correlationId: String = someCorrelationId, replyTo: String = someReplyTo, deliveryTag: Long = someDeliveryTag): AmqpRequestMessageWithProperties =

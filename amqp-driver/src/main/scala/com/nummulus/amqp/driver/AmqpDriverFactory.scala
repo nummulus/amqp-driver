@@ -7,7 +7,7 @@ trait AmqpDriverFactory {
   /**
    * Returns a new driver with the configuration loaded from "application.conf".
    */
-  def apply: AmqpDriver
+  def apply(): AmqpDriver
   
   /**
    * Returns a new driver with the configuration loaded from the specified configuration file.
