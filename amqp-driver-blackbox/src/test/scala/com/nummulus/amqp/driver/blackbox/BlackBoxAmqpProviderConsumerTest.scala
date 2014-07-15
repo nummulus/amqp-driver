@@ -37,6 +37,8 @@ class BlackBoxAmqpProviderConsumerTest extends TestKit(ActorSystem("test-system"
     probe.expectMsgPF() {
       case AmqpRequestMessage(SomeMessage, _) => true
     }
+    
+    pc.done()
   }
 
   
@@ -57,9 +59,11 @@ class BlackBoxAmqpProviderConsumerTest extends TestKit(ActorSystem("test-system"
     }
     
     whenReady(f) { _ should be (SomeAnswer) }
+    
+    pc.done()
   }
   
-  ignore should "crash when two replies are sent" in {
+  it should "crash when two replies are sent" in {
     pc.bind(probe.ref)
     
     pc.ask(SomeMessage)
@@ -70,7 +74,7 @@ class BlackBoxAmqpProviderConsumerTest extends TestKit(ActorSystem("test-system"
         probe.sender ! AmqpResponseMessage(SomeAnswer, tag)
     }
     
-    // TODO: assert that the driver has shut down
+    an [IllegalStateException] should be thrownBy pc.done()
   }
   
   
@@ -79,6 +83,7 @@ class BlackBoxAmqpProviderConsumerTest extends TestKit(ActorSystem("test-system"
   it should "throw when a second actor is bound" in {
     pc.bind(probe.ref)
     an [IllegalStateException] should be thrownBy pc.bind(probe.ref)
+    pc.done()
   }
   
   it should "bind to an actor created by a callback function" in {
@@ -91,6 +96,8 @@ class BlackBoxAmqpProviderConsumerTest extends TestKit(ActorSystem("test-system"
     pc.bind(factory)
     
     factoryCalled should be (true)
+    
+    pc.done()
   }
   
   

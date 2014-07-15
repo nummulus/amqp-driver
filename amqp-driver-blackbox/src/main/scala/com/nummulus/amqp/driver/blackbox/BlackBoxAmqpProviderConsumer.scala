@@ -1,6 +1,9 @@
 package com.nummulus.amqp.driver.blackbox
+
+import scala.concurrent.Await
 import scala.concurrent.Future
 import scala.concurrent.Promise
+import scala.concurrent.duration._
 
 import com.nummulus.amqp.driver.AmqpConsumer
 import com.nummulus.amqp.driver.AmqpProvider
@@ -13,6 +16,7 @@ import akka.actor.Props
 
 class BlackBoxAmqpProviderConsumer(system: ActorSystem) extends AmqpProvider with AmqpConsumer {
   private var handler: Option[ActorRef] = None
+  private val completed = Promise[Boolean]()
 
   /**
    * Activates the black box provider. All messages that appear on the queue
@@ -26,7 +30,7 @@ class BlackBoxAmqpProviderConsumer(system: ActorSystem) extends AmqpProvider wit
    */
   def bind(createActor: ActorFactory): Unit = handler match {
     case None =>
-      val handlerActor = system.actorOf(Props(classOf[BlackBoxHandlerActor]))
+      val handlerActor = system.actorOf(Props(classOf[BlackBoxHandlerActor], completed))
       handlerActor ! Initialize(createActor(handlerActor))
       handler = Some(handlerActor)
     case Some(_) =>
@@ -38,6 +42,7 @@ class BlackBoxAmqpProviderConsumer(system: ActorSystem) extends AmqpProvider wit
    */
   def unbind(): Unit = handler match {
     case Some(h) =>
+      done()
       system.stop(h)
       handler = None
     case None => noActorBound
@@ -60,6 +65,13 @@ class BlackBoxAmqpProviderConsumer(system: ActorSystem) extends AmqpProvider wit
    */
   def tell(message: String): Unit = handler match {
     case Some(h) => h ! TellMessage(message)
+    case None => noActorBound
+  }
+  
+  def done(): Unit = handler match {
+    case Some(h) =>
+      h ! Finalize
+      Await.result(completed.future, 2.seconds)
     case None => noActorBound
   }
   
