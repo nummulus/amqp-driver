@@ -17,6 +17,7 @@ import akka.actor.Props
 class BlackBoxAmqpProviderConsumer(system: ActorSystem) extends AmqpProvider with AmqpConsumer {
   private var handler: Option[ActorRef] = None
   private val completed = Promise[Boolean]()
+  private var alreadyDone = false
 
   /**
    * Activates the black box provider. All messages that appear on the queue
@@ -68,8 +69,15 @@ class BlackBoxAmqpProviderConsumer(system: ActorSystem) extends AmqpProvider wit
     case None => noActorBound
   }
   
+  /**
+   * Finalizes the black box provider.
+   */
   def done(): Unit = handler match {
+    case Some(h) if alreadyDone =>
+      // Calling this method twice is ok,
+      // but if something went wrong we don't need the same exception twice.
     case Some(h) =>
+      alreadyDone = true
       h ! Finalize
       Await.result(completed.future, 2.seconds)
     case None => noActorBound
