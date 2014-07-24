@@ -14,7 +14,7 @@ import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.Props
 
-class BlackBoxAmqpProviderConsumer(system: ActorSystem) extends AmqpProvider with AmqpConsumer {
+private[blackbox] class BlackBoxAmqpProviderConsumer(system: ActorSystem) extends AmqpProvider with AmqpConsumer {
   private var handler: Option[ActorRef] = None
   private val completed = Promise[Boolean]()
   private var alreadyDone = false
