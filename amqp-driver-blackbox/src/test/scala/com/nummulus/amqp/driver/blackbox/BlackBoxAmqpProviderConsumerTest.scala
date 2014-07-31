@@ -27,7 +27,7 @@ class BlackBoxAmqpProviderConsumerTest extends TestKit(ActorSystem("test-system"
   behavior of "tell"
   
   it should "throw when no actor is bound" in {
-    an [IllegalStateException] should be thrownBy pc.tell(SomeMessage)
+    aNoActorBoundExceptionShouldBeThrownBy (pc.tell(SomeMessage))
   }
   
   it should "forward a message" in {
@@ -45,7 +45,7 @@ class BlackBoxAmqpProviderConsumerTest extends TestKit(ActorSystem("test-system"
   behavior of "ask"
   
   it should "throw when no actor is bound" in {
-    an [IllegalStateException] should be thrownBy pc.ask(SomeMessage)
+    aNoActorBoundExceptionShouldBeThrownBy (pc.ask(SomeMessage))
   }
   
   it should "forward a message and return an answer" in {
@@ -74,7 +74,8 @@ class BlackBoxAmqpProviderConsumerTest extends TestKit(ActorSystem("test-system"
         probe.sender ! AmqpResponseMessage(SomeAnswer, tag)
     }
     
-    an [IllegalStateException] should be thrownBy pc.done()
+    val thrown = the [IllegalStateException] thrownBy pc.done()
+    thrown.getMessage should startWith ("Unknown deliveryTag")
   }
   
   
@@ -82,7 +83,8 @@ class BlackBoxAmqpProviderConsumerTest extends TestKit(ActorSystem("test-system"
   
   it should "throw when a second actor is bound" in {
     pc.bind(probe.ref)
-    an [IllegalStateException] should be thrownBy pc.bind(probe.ref)
+    val thrown = the [IllegalStateException] thrownBy pc.bind(probe.ref)
+    thrown.getMessage should be ("An actor was already bound to AmqpDriver")
     pc.done()
   }
   
@@ -104,23 +106,35 @@ class BlackBoxAmqpProviderConsumerTest extends TestKit(ActorSystem("test-system"
   behavior of "unbind"
   
   it should "throw when no actor is bound" in {
-    an [IllegalStateException] should be thrownBy pc.unbind()
+    aNoActorBoundExceptionShouldBeThrownBy (pc.unbind())
   }
   
   it should "make the BlackBoxProviderConsumer unusable for tell" in {
     pc.bind(probe.ref)
     pc.unbind()
 
-    an [IllegalStateException] should be thrownBy pc.tell(SomeMessage)
+    aNoActorBoundExceptionShouldBeThrownBy (pc.tell(SomeMessage))
   }
   
   it should "make the BlackBoxProviderConsumer unusable for ask" in {
     pc.bind(probe.ref)
     pc.unbind()
 
-    an [IllegalStateException] should be thrownBy pc.ask(SomeMessage)
+    aNoActorBoundExceptionShouldBeThrownBy (pc.ask(SomeMessage))
   }
 
+
+  behavior of "done"
+
+  it should "throw when no actor is bound" in {
+    aNoActorBoundExceptionShouldBeThrownBy (pc.done())
+  }
+
+
+  private def aNoActorBoundExceptionShouldBeThrownBy(fun: => Unit) = {
+    val thrown = the [IllegalStateException] thrownBy fun
+    thrown.getMessage should be ("No actor bound to AmqpDriver")
+  }
 
   override def afterAll: Unit = {
     TestKit.shutdownActorSystem(system)
