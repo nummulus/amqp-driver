@@ -8,6 +8,20 @@
 
 	<name>AMQP Driver - Parent POM</name>
 
+	<licenses>
+		<license>
+			<name>The Apache Software License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+	<scm>
+		<connection>scm:git:git@github.com:nummulus/amqp-driver.git</connection>
+		<developerConnection>scm:git:git@github.com:nummulus/amqp-driver.git</developerConnection>
+		<url>git@github.com:nummulus/amqp-driver.git</url>
+	</scm>
+
 	<parent>
 		<groupId>org.sonatype.oss</groupId>
 		<artifactId>oss-parent</artifactId>
