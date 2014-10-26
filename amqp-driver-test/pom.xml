@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>com.nummulus.amqp.driver</groupId>
 		<artifactId>amqp-parent_2.10</artifactId>
-		<version>0.1.0</version>
+		<version>0.1.1-SNAPSHOT</version>
 	</parent>
 
 	<dependencies>
