@@ -50,7 +50,7 @@ private[driver] class DefaultConsumer(
     logger.debug("Properties = {}", properties)
     channel.basicPublish("", configuration.queue, properties, message.getBytes)
     
-    future {
+    Future {
       waitForDelivery(correlationId)
     }
   }
