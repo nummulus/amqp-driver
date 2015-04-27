@@ -1,7 +1,5 @@
 package com.nummulus.amqp.driver
 
-import com.rabbitmq.client.{ConnectionFactory => RabbitConnectionFactory}
-import com.typesafe.config.ConfigFactory
 
 
 /**
