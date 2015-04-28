@@ -20,12 +20,12 @@ import _root_.akka.util.Timeout
  * Default provider implementation.
  */
 private[driver] class DefaultProvider(
+    actorSystem: ActorSystem,
     channel: Channel, 
     configuration: QueueConfiguration, 
     generateId: IdGenerator = IdGenerators.random) extends AmqpProvider {
   
   private val logger = LoggerFactory.getLogger(getClass)
-  private lazy val actorSystem = ActorSystem("AmqpDriver")
   
   private val requestQueue = channel.queueDeclare(configuration.queue, configuration.durable, configuration.exclusive, configuration.autoDelete, null)
   logger.debug("Declared request queue: {}", configuration.queue)

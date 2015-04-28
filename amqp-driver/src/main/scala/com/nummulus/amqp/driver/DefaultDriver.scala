@@ -5,6 +5,8 @@ import org.slf4j.LoggerFactory
 import com.nummulus.amqp.driver.configuration.QueueConfigurer
 import com.typesafe.config.Config
 
+import _root_.akka.actor.ActorSystem
+
 /**
  * Default driver implementation.
  * 
@@ -16,6 +18,7 @@ private[driver] class DefaultDriver(connectionFactory: ConnectionFactory, config
   private val logger = LoggerFactory.getLogger(getClass)
   private val rootConfig = config.getConfig("amqp")
   
+  private lazy val actorSystem = ActorSystem("AmqpDriver")
   private lazy val connection = createConnection()
   
   /**
@@ -48,7 +51,7 @@ private[driver] class DefaultDriver(connectionFactory: ConnectionFactory, config
     val queueConfiguration = getProvideQueuerConfiguration(rootConfig, operation)
     
     val channel = connection.createChannel()
-    new DefaultProvider(channel, queueConfiguration)
+    new DefaultProvider(actorSystem, channel, queueConfiguration)
   }
   
   /**
