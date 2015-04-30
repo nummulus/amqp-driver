@@ -16,6 +16,6 @@ class ProviderConsumerFixture(fileName: String) {
   val config = ConfigFactory.load(fileName);
   val connectionFactory = new ConnectionFactory(new RabbitConnectionFactory)
   val driver = new DefaultDriver(connectionFactory, config)
-  val consumer = driver.newConsumer("service.test", "Test")
+  val consumer = driver.newAkkaConsumer("service.test", "Test")
   val provider = driver.newProvider("Test")
 }

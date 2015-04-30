@@ -5,18 +5,23 @@ import org.scalatest.BeforeAndAfterAll
 import org.scalatest.FlatSpecLike
 import org.scalatest.Matchers
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.junit._
 import org.scalatest.prop.TableDrivenPropertyChecks
+
+import com.nummulus.amqp.driver.akka.AmqpConsumerRequest
+import com.nummulus.amqp.driver.akka.AmqpConsumerResponse
 import com.nummulus.amqp.driver.akka.AmqpRequestMessage
 import com.nummulus.amqp.driver.akka.AmqpResponseMessage
 import com.nummulus.amqp.driver.fixture.ProviderConsumerFixture
+
 import akka.actor.Actor
 import akka.actor.ActorSystem
 import akka.actor.Props
+import akka.testkit.ImplicitSender
 import akka.testkit.TestKit
-import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class ProviderConsumerTest extends TestKit(ActorSystem("test-system")) with FlatSpecLike with Matchers 
+class ProviderConsumerTest extends TestKit(ActorSystem("test-system")) with ImplicitSender with FlatSpecLike with Matchers 
   with ScalaFutures with TableDrivenPropertyChecks with BeforeAndAfterAll {
   
   override def afterAll {
@@ -36,10 +41,9 @@ class ProviderConsumerTest extends TestKit(ActorSystem("test-system")) with Flat
     it should "deliver a message back to the consumer" in new ProviderConsumerFixture(propertyFile) {
       provider.bind(system.actorOf(Props[EchoActor]))
 
-      val response = consumer.ask("hello?")
-      whenReady(response) { s =>
-        s should be("hello?")
-      }
+      consumer ! AmqpConsumerRequest("hello?", Some(self))
+      
+      expectMsg(AmqpConsumerResponse("hello?"))
       
       provider.unbind();
     }
@@ -51,7 +55,8 @@ class ProviderConsumerTest extends TestKit(ActorSystem("test-system")) with Flat
     it should "ask a provider a question that arrives" in new ProviderConsumerFixture(propertyFile) {
       provider.bind(testActor)
 
-      consumer.ask("hello?")
+      consumer ! AmqpConsumerRequest("hello?", Some(self))
+      
       expectMsg(AmqpRequestMessage("hello?", 1))
       
       provider.unbind();
@@ -64,7 +69,8 @@ class ProviderConsumerTest extends TestKit(ActorSystem("test-system")) with Flat
     it should "tell a provider a message that arrives" in new ProviderConsumerFixture(propertyFile) {
       provider.bind(testActor)
 
-      consumer.tell("I pity the fool!")
+      consumer ! AmqpConsumerRequest("I pity the fool!")
+      
       expectMsg(AmqpRequestMessage("I pity the fool!", 1))
       
       provider.unbind();

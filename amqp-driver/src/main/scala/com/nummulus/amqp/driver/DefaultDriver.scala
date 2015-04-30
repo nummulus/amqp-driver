@@ -24,24 +24,6 @@ private[driver] class DefaultDriver(connectionFactory: ConnectionFactory, config
   private lazy val connection = createConnection()
   
   /**
-   * Creates a new consumer for the specified service operation.
-   * 
-   * If no connection to the broker is available, one will be established.
-   * 
-   * @param service owner of the operation
-   * @param operation operation name of the operation to invoke
-   * @return new consumer
-   * @throws QueueConfiguration if the queue has missing keys in the configuration file
-   */
-  override def newConsumer(service: String, operation: String): AmqpConsumer = {
-    logger.info(s"Retrieving configuration for operation '$operation' on service '$service'")
-    val queueConfiguration = getConsumerQueueConfiguration(rootConfig, service, operation)
-    
-    val channel = connection.createChannel()
-    new DefaultConsumer(channel, queueConfiguration, MessageConsumer.newBlocking(channel))
-  }
-  
-  /**
    * Returns an actor which can communicate with the services' operation.
    * 
    * @param service name of the service owning the operation to consume

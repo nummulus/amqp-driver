@@ -7,15 +7,6 @@ import _root_.akka.actor.ActorRef
  */
 trait AmqpDriver {
   /**
-   * Returns a new consumer for a services' operation.
-   * 
-   * @param service name of the service owning the operation to consume
-   * @param operation name of the operation to consume
-   * @return new consumer
-   */
-  def newConsumer(service: String, operation: String): AmqpConsumer
-  
-  /**
    * Returns an actor which can communicate with the services' operation.
    * 
    * @param service name of the service owning the operation to consume
