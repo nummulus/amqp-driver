@@ -15,8 +15,9 @@
 * Renamed package `com.nummulus.amqp.driver.akka` to `com.nummulus.amqp.driver.api.provider` as it only contained provider functionality.
 * Providers no longer create their own `ActorSystem`. The driver now lazily creates one which is shared by all providers and consumers.
 
-### Libraries
+### Other
 
+* Moved `com.nummulus.amqp.driver.provider.AkkaMessageConsumer` to `com.nummulus.amqp.driver.akka`.
 * Scala version upgraded from 2.10 to 2.11
 * JDK upgraded from 1.7 to 1.8
 

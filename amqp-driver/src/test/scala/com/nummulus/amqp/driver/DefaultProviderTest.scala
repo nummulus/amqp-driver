@@ -6,9 +6,9 @@ import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest._
 
+import com.nummulus.amqp.driver.akka.AkkaMessageConsumer
 import com.nummulus.amqp.driver.fixture.ProviderFixture
 import com.nummulus.amqp.driver.matcher.TypeMatcher
-import com.nummulus.amqp.driver.provider.AkkaMessageConsumer
 
 import _root_.akka.actor.ActorSystem
 import _root_.akka.testkit.TestKit

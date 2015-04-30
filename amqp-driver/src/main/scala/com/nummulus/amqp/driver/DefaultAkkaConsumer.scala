@@ -3,11 +3,11 @@ package com.nummulus.amqp.driver
 import org.slf4j.LoggerFactory
 
 import com.nummulus.amqp.driver.IdGenerators._
+import com.nummulus.amqp.driver.akka.AkkaMessageConsumer
 import com.nummulus.amqp.driver.api.consumer.AmqpConsumerRequest
 import com.nummulus.amqp.driver.api.consumer.AmqpConsumerResponse
 import com.nummulus.amqp.driver.api.provider.AmqpRequestMessageWithProperties
 import com.nummulus.amqp.driver.configuration.QueueConfiguration
-import com.nummulus.amqp.driver.provider.AkkaMessageConsumer
 
 import _root_.akka.actor.Actor
 import _root_.akka.actor.ActorRef

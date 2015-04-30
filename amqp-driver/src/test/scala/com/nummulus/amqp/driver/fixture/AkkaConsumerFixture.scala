@@ -6,8 +6,8 @@ import org.scalatest.mock.MockitoSugar
 import com.nummulus.amqp.driver.Channel
 import com.nummulus.amqp.driver.DefaultAkkaConsumer
 import com.nummulus.amqp.driver.QueueDeclareOk
+import com.nummulus.amqp.driver.akka.AkkaMessageConsumer
 import com.nummulus.amqp.driver.configuration.QueueConfiguration
-import com.nummulus.amqp.driver.provider.AkkaMessageConsumer
 
 import akka.actor.ActorSystem
 import akka.actor.Props

@@ -1,4 +1,4 @@
-package com.nummulus.amqp.driver.provider
+package com.nummulus.amqp.driver.akka
 
 import com.nummulus.amqp.driver.Channel
 import com.nummulus.amqp.driver.MessageConsumer

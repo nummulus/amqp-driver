@@ -1,4 +1,4 @@
-package com.nummulus.amqp.driver.provider
+package com.nummulus.amqp.driver.akka
 
 import org.junit.runner.RunWith
 import org.scalatest.FlatSpecLike

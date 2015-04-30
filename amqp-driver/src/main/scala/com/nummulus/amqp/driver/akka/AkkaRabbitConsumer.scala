@@ -1,4 +1,4 @@
-package com.nummulus.amqp.driver.provider
+package com.nummulus.amqp.driver.akka
 
 import java.nio.charset.StandardCharsets
 

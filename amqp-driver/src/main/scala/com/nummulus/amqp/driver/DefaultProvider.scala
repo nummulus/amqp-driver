@@ -5,9 +5,9 @@ import scala.concurrent.duration._
 
 import org.slf4j.LoggerFactory
 
+import com.nummulus.amqp.driver.akka.AkkaMessageConsumer
 import com.nummulus.amqp.driver.api.provider.AmqpGuardianActorScope._
 import com.nummulus.amqp.driver.configuration.QueueConfiguration
-import com.nummulus.amqp.driver.provider.AkkaMessageConsumer
 
 import AmqpProvider._
 import IdGenerators._
