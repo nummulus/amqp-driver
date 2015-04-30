@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory
 import com.nummulus.amqp.driver.configuration.QueueConfigurer
 import com.typesafe.config.Config
 
+import _root_.akka.actor.ActorRef
 import _root_.akka.actor.ActorSystem
 
 /**
@@ -38,6 +39,15 @@ private[driver] class DefaultDriver(connectionFactory: ConnectionFactory, config
     val channel = connection.createChannel()
     new DefaultConsumer(channel, queueConfiguration, MessageConsumer.newBlocking(channel))
   }
+  
+  /**
+   * Returns an actor which can communicate with the services' operation.
+   * 
+   * @param service name of the service owning the operation to consume
+   * @param operation name of the operation to consume
+   * @return new consumer
+   */
+  def newConsumerActor(service: String, operation: String): ActorRef = ???
   
   /**
    * Returns a new provider for a services' operation.
