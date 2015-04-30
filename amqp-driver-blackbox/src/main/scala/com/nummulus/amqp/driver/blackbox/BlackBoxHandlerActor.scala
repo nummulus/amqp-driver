@@ -1,14 +1,16 @@
 package com.nummulus.amqp.driver.blackbox
 
 import java.util.concurrent.atomic.AtomicLong
+
 import scala.concurrent.Promise
 import scala.util.Success
-import com.nummulus.amqp.driver.akka.AmqpRequestMessage
-import com.nummulus.amqp.driver.akka.AmqpResponseMessage
+
+import com.nummulus.amqp.driver.api.provider.AmqpRequestMessage
+import com.nummulus.amqp.driver.api.provider.AmqpResponseMessage
+
 import akka.actor.Actor
 import akka.actor.ActorLogging
 import akka.actor.ActorRef
-import java.util.concurrent.atomic.AtomicBoolean
 
 private[blackbox] object BlackBoxHandlerActorScope {
 

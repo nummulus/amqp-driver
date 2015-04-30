@@ -1,4 +1,4 @@
-package com.nummulus.amqp.driver.akka
+package com.nummulus.amqp.driver.api.provider
 
 import com.nummulus.amqp.driver.MessageProperties
 

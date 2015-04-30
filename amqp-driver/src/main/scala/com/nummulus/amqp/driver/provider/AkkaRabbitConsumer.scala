@@ -1,13 +1,15 @@
 package com.nummulus.amqp.driver.provider
 
+import java.nio.charset.StandardCharsets
+
 import com.nummulus.amqp.driver.MessageProperties
-import com.nummulus.amqp.driver.akka.AmqpRequestMessageWithProperties
+import com.nummulus.amqp.driver.api.provider.AmqpRequestMessageWithProperties
 import com.rabbitmq.client.AMQP
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.DefaultConsumer
 import com.rabbitmq.client.Envelope
+
 import akka.actor.ActorRef
-import java.nio.charset.StandardCharsets
 
 /**
  * Akka message consumer.

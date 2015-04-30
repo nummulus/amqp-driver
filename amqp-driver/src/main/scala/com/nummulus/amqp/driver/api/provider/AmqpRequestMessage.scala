@@ -1,4 +1,4 @@
-package com.nummulus.amqp.driver.akka
+package com.nummulus.amqp.driver.api.provider
 
 /**
  * Represents a message from AMQP.

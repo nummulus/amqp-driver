@@ -6,12 +6,14 @@ import org.scalatest.FlatSpecLike
 import org.scalatest.Matchers
 import org.scalatest.OneInstancePerTest
 import org.scalatest.concurrent.ScalaFutures
-import com.nummulus.amqp.driver.akka.AmqpRequestMessage
-import com.nummulus.amqp.driver.akka.AmqpResponseMessage
+
+import com.nummulus.amqp.driver.AmqpProvider
+import com.nummulus.amqp.driver.api.provider.AmqpRequestMessage
+import com.nummulus.amqp.driver.api.provider.AmqpResponseMessage
+
 import akka.actor.ActorSystem
 import akka.testkit.TestKit
 import akka.testkit.TestProbe
-import com.nummulus.amqp.driver.AmqpProvider
 
 @RunWith(classOf[org.scalatest.junit.JUnitRunner])
 class BlackBoxAmqpProviderConsumerTest extends TestKit(ActorSystem("test-system"))

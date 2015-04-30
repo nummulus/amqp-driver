@@ -1,12 +1,14 @@
-package com.nummulus.amqp.driver.akka
+package com.nummulus.amqp.driver.api.provider
+
+import org.slf4j.LoggerFactory
 
 import com.nummulus.amqp.driver.Channel
 import com.nummulus.amqp.driver.MessageProperties
 import com.nummulus.amqp.driver.configuration.QueueConfiguration
+
 import akka.actor.Actor
 import akka.actor.ActorRef
 import akka.actor.Terminated
-import org.slf4j.LoggerFactory
 
 /**
  * Entry point for AMQP messages to enter the Akka world.

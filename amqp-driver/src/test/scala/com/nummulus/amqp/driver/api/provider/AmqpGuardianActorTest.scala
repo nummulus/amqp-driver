@@ -1,4 +1,4 @@
-package com.nummulus.amqp.driver.akka
+package com.nummulus.amqp.driver.api.provider
 
 import scala.concurrent.duration._
 
@@ -14,9 +14,9 @@ import org.scalatest.mock.MockitoSugar
 
 import com.nummulus.amqp.driver.Channel
 import com.nummulus.amqp.driver.MessageProperties
+import com.nummulus.amqp.driver.api.provider.AmqpGuardianActorScope._
 import com.nummulus.amqp.driver.configuration.QueueConfiguration
 
-import AmqpGuardianActorScope._
 import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.PoisonPill
@@ -45,6 +45,7 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system")) with Fla
   
   it should "return an InitializationComplete message" in {
     import _root_.akka.pattern.ask
+    
     val guardian = createGuardian(true)
     val future = (guardian ? Initialize(testActor))(Timeout(2.seconds))
     future.futureValue should be (InitializationComplete)

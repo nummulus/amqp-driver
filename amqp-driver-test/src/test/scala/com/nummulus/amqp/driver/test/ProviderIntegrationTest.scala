@@ -5,7 +5,7 @@ import org.mockito.Mockito._
 import org.scalatest._
 import org.scalatest.junit._
 
-import com.nummulus.amqp.driver.akka.AmqpRequestMessage
+import com.nummulus.amqp.driver.api.provider.AmqpRequestMessage
 import com.nummulus.amqp.driver.fixture.BoundProviderFixture
 
 @RunWith(classOf[JUnitRunner])

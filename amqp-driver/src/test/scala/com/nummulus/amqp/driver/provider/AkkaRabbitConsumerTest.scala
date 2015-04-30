@@ -4,13 +4,15 @@ import org.junit.runner.RunWith
 import org.scalatest.FlatSpecLike
 import org.scalatest.Matchers
 import org.scalatest.OneInstancePerTest
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.junit._
 import org.scalatest.mock.MockitoSugar
+
 import com.nummulus.amqp.driver.MessageProperties
-import com.nummulus.amqp.driver.akka.AmqpRequestMessageWithProperties
+import com.nummulus.amqp.driver.api.provider.AmqpRequestMessageWithProperties
 import com.rabbitmq.client.AMQP
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Envelope
+
 import akka.actor.ActorSystem
 import akka.testkit.TestKit
 

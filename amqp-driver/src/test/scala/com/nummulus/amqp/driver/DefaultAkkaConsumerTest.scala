@@ -7,9 +7,9 @@ import org.scalatest.FlatSpecLike
 import org.scalatest.Matchers
 import org.scalatest.junit.JUnitRunner
 
-import com.nummulus.amqp.driver.akka.AmqpRequestMessageWithProperties
 import com.nummulus.amqp.driver.api.consumer.AmqpConsumerResponse
 import com.nummulus.amqp.driver.api.consumer.AmqpConsumerRequest
+import com.nummulus.amqp.driver.api.provider.AmqpRequestMessageWithProperties
 import com.nummulus.amqp.driver.fixture.AkkaConsumerFixture
 import com.nummulus.amqp.driver.provider.AkkaMessageConsumer
 
