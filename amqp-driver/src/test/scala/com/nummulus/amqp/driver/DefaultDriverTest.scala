@@ -46,6 +46,41 @@ class DefaultDriverTest extends FlatSpec with Matchers with MockitoSugar with On
     thrown.getMessage should be ("No configuration setting found for key 'nonExistingTestOperation'")
   }
   
+  
+  it should "connect to the broker after creating a consumer actor" in {
+    verify (factory, never).newConnection
+    
+    driver.newAkkaConsumer("TestService", "testOperation")
+    verify (factory, times(1)).newConnection
+  }
+  
+  it should "set the broker host when creating a consumer actor" in {
+    driver.newAkkaConsumer("TestService", "testOperation")
+    verify (factory).setHost("localhost")
+  }
+  
+  it should "create a channel when creating a consumer actor" in {
+    driver.newAkkaConsumer("TestService", "testOperation")
+    verify (connection).createChannel
+  }
+  
+  it should "throw an exception if the service doesn't exist when creating a consumer actor" in {
+    val exception = intercept[ConfigurationException] {
+      driver.newAkkaConsumer("NonExistingService", "testOperation")
+    }
+    
+    exception.getMessage should be ("No configuration setting found for key 'uses.NonExistingService'")
+  }
+  
+  it should "throw an exception if the operation doesn't exist for a valid service when creating a consumer actor" in {
+    val thrown = intercept[ConfigurationException] {
+      driver.newAkkaConsumer("TestService", "nonExistingTestOperation")
+    }
+    
+    thrown.getMessage should be ("No configuration setting found for key 'nonExistingTestOperation'")
+  }
+  
+  
   it should "connect to the broker after creating a provider" in {
     verify (factory, never).newConnection
     

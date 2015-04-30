@@ -7,6 +7,7 @@ import com.typesafe.config.Config
 
 import _root_.akka.actor.ActorRef
 import _root_.akka.actor.ActorSystem
+import _root_.akka.actor.Props
 
 /**
  * Default driver implementation.
@@ -47,7 +48,13 @@ private[driver] class DefaultDriver(connectionFactory: ConnectionFactory, config
    * @param operation name of the operation to consume
    * @return new consumer
    */
-  def newAkkaConsumer(service: String, operation: String): ActorRef = ???
+  def newAkkaConsumer(service: String, operation: String): ActorRef = {
+    logger.info(s"Retrieving configuration for operation '$operation' on service '$service'")
+    val queueConfiguration = getConsumerQueueConfiguration(rootConfig, service, operation)
+    
+    val channel = connection.createChannel()
+    actorSystem.actorOf(Props(classOf[DefaultAkkaConsumer], channel, queueConfiguration, IdGenerators.random))
+  }
   
   /**
    * Returns a new provider for a services' operation.
