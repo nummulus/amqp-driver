@@ -31,7 +31,7 @@ class DefaultProviderTest extends TestKit(ActorSystem("test-system")) with FlatS
     verifyMessageConsumption(channel)
   }
   
-  it should "bind to an actor created by a callback function" in new ProviderFixture {
+  it should "bind to an actor created by a callback function" in new ProviderFixture("requestQueue0") {
     var factoryCalled = false
     val factory: AmqpProvider.ActorFactory = sender => {
       factoryCalled = true
@@ -44,14 +44,14 @@ class DefaultProviderTest extends TestKit(ActorSystem("test-system")) with FlatS
     verifyMessageConsumption(channel)
   }
   
-  it should "not receive messages after an unbind" in new ProviderFixture {
+  it should "not receive messages after an unbind" in new ProviderFixture("requestQueue1") {
     provider.bind(testActor)
     provider.unbind()
     
     verify (channel).basicCancel(anyString)
   }
   
-  it should "fail when an attempt to re-bind after unbind is made" in new ProviderFixture {
+  it should "fail when an attempt to re-bind after unbind is made" in new ProviderFixture("requestQueue2") {
     provider.bind(testActor)
     provider.unbind()
     
@@ -67,7 +67,7 @@ class DefaultProviderTest extends TestKit(ActorSystem("test-system")) with FlatS
     
     verify (channel).basicConsume(queueCaptor.capture(), autoAcknowledgeCaptor.capture(), anyString(), callbackCaptor.capture())
     
-    queueCaptor.getValue should be ("requestQueue")
+    queueCaptor.getValue should startWith ("requestQueue")
     autoAcknowledgeCaptor.getValue should be (true)
     callbackCaptor.getValue should be (ofType[AkkaMessageConsumer])
   }
