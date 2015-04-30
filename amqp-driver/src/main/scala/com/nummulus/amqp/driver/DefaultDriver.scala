@@ -47,7 +47,7 @@ private[driver] class DefaultDriver(connectionFactory: ConnectionFactory, config
    * @param operation name of the operation to consume
    * @return new consumer
    */
-  def newConsumerActor(service: String, operation: String): ActorRef = ???
+  def newAkkaConsumer(service: String, operation: String): ActorRef = ???
   
   /**
    * Returns a new provider for a services' operation.
