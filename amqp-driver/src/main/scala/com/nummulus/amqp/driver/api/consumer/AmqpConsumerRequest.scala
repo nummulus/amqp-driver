@@ -1,4 +1,4 @@
-package com.nummulus.amqp.driver.akka
+package com.nummulus.amqp.driver.api.consumer
 
 import _root_.akka.actor.ActorRef
 

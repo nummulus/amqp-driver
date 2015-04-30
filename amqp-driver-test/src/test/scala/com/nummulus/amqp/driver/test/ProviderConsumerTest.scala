@@ -8,10 +8,10 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.junit._
 import org.scalatest.prop.TableDrivenPropertyChecks
 
-import com.nummulus.amqp.driver.akka.AmqpConsumerRequest
-import com.nummulus.amqp.driver.akka.AmqpConsumerResponse
 import com.nummulus.amqp.driver.akka.AmqpRequestMessage
 import com.nummulus.amqp.driver.akka.AmqpResponseMessage
+import com.nummulus.amqp.driver.api.consumer.AmqpConsumerRequest
+import com.nummulus.amqp.driver.api.consumer.AmqpConsumerResponse
 import com.nummulus.amqp.driver.fixture.ProviderConsumerFixture
 
 import akka.actor.Actor

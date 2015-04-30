@@ -6,16 +6,16 @@ import org.mockito.Mockito._
 import org.scalatest.FlatSpecLike
 import org.scalatest.Matchers
 import org.scalatest.junit.JUnitRunner
+
+import com.nummulus.amqp.driver.akka.AmqpRequestMessageWithProperties
+import com.nummulus.amqp.driver.api.consumer.AmqpConsumerResponse
+import com.nummulus.amqp.driver.api.consumer.AmqpConsumerRequest
 import com.nummulus.amqp.driver.fixture.AkkaConsumerFixture
 import com.nummulus.amqp.driver.provider.AkkaMessageConsumer
+
 import _root_.akka.actor.ActorSystem
-import _root_.akka.testkit.TestKit
-import com.nummulus.amqp.driver.akka.AmqpConsumerRequest
-import com.nummulus.amqp.driver.fixture.AkkaConsumerFixture
 import _root_.akka.testkit.ImplicitSender
-import com.nummulus.amqp.driver.akka.AmqpRequestMessageWithProperties
-import com.nummulus.amqp.driver.akka.AmqpConsumerResponse
-import com.nummulus.amqp.driver.fixture.AkkaConsumerFixture
+import _root_.akka.testkit.TestKit
 
 @RunWith(classOf[JUnitRunner])
 class DefaultAkkaConsumerTest extends TestKit(ActorSystem("test-system"))
