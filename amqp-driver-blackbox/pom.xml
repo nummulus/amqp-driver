@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>com.nummulus.amqp.driver</groupId>
 		<artifactId>amqp-parent_2.11</artifactId>
-		<version>0.1.1-SNAPSHOT</version>
+		<version>0.2.0-SNAPSHOT</version>
 	</parent>
 
 	<dependencies>
@@ -17,7 +17,7 @@
 			<artifactId>amqp-driver_2.11</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		
+
 		<!-- Test dependencies -->
 		<dependency>
 			<groupId>junit</groupId>
