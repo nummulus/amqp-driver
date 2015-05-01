@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicLong
 import scala.concurrent.Promise
 import scala.util.Success
 
-import com.nummulus.amqp.driver.api.provider.AmqpRequestMessage
+import com.nummulus.amqp.driver.api.provider.AmqpProviderRequest
 import com.nummulus.amqp.driver.api.provider.AmqpResponseMessage
 
 import akka.actor.Actor
@@ -28,12 +28,12 @@ private[blackbox] object BlackBoxHandlerActorScope {
 
     def active(actor: ActorRef): Receive = {
       case TellMessage(message) =>
-        actor ! AmqpRequestMessage(message, tag.getAndIncrement())
+        actor ! AmqpProviderRequest(message, tag.getAndIncrement())
 
       case AskMessage(message, promise) =>
         val deliveryTag = tag.getAndIncrement()
         unanswered += (deliveryTag -> promise)
-        actor ! AmqpRequestMessage(message, deliveryTag)
+        actor ! AmqpProviderRequest(message, deliveryTag)
 
       case AmqpResponseMessage(body, deliveryTag) => unanswered.get(deliveryTag) match {
         case Some(promise) =>

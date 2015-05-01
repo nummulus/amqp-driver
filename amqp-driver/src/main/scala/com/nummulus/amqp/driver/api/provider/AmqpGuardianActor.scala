@@ -42,7 +42,7 @@ private[driver] object AmqpGuardianActorScope {
         if (!autoAcknowledge) unacknowledged += deliveryTag
         if (properties.replyTo != null && !properties.replyTo.isEmpty) unanswered += (deliveryTag -> properties)
 
-        actor ! AmqpRequestMessage(body, deliveryTag)
+        actor ! AmqpProviderRequest(body, deliveryTag)
       }
 
       /**

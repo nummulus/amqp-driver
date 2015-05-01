@@ -13,6 +13,7 @@
 #### Breaking Changes
 
 * Renamed package `com.nummulus.amqp.driver.akka` to `com.nummulus.amqp.driver.api.provider` as it only contained provider functionality.
+* Renamed `AmqpRequestMessage` to `AmqpProviderRequest`.
 * Providers no longer create their own `ActorSystem`. The driver now lazily creates one which is shared by all providers and consumers.
 
 ### Other

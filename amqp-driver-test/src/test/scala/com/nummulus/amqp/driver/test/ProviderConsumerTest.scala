@@ -10,7 +10,7 @@ import org.scalatest.prop.TableDrivenPropertyChecks
 
 import com.nummulus.amqp.driver.api.consumer.AmqpConsumerRequest
 import com.nummulus.amqp.driver.api.consumer.AmqpConsumerResponse
-import com.nummulus.amqp.driver.api.provider.AmqpRequestMessage
+import com.nummulus.amqp.driver.api.provider.AmqpProviderRequest
 import com.nummulus.amqp.driver.api.provider.AmqpResponseMessage
 import com.nummulus.amqp.driver.fixture.ProviderConsumerFixture
 
@@ -57,7 +57,7 @@ class ProviderConsumerTest extends TestKit(ActorSystem("test-system")) with Impl
 
       consumer ! AmqpConsumerRequest("hello?", Some(self))
       
-      expectMsg(AmqpRequestMessage("hello?", 1))
+      expectMsg(AmqpProviderRequest("hello?", 1))
       
       provider.unbind();
     }
@@ -71,7 +71,7 @@ class ProviderConsumerTest extends TestKit(ActorSystem("test-system")) with Impl
 
       consumer ! AmqpConsumerRequest("I pity the fool!")
       
-      expectMsg(AmqpRequestMessage("I pity the fool!", 1))
+      expectMsg(AmqpProviderRequest("I pity the fool!", 1))
       
       provider.unbind();
     }
@@ -80,7 +80,7 @@ class ProviderConsumerTest extends TestKit(ActorSystem("test-system")) with Impl
 
 private class EchoActor extends Actor {
   def receive = {
-    case AmqpRequestMessage(body, deliveryTag) => {
+    case AmqpProviderRequest(body, deliveryTag) => {
       sender ! AmqpResponseMessage(body, deliveryTag)
     }
   }

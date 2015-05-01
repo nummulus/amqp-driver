@@ -6,4 +6,4 @@ package com.nummulus.amqp.driver.api.provider
  * @param body message contents
  * @param deliveryTag amqp message identifier
  */
-case class AmqpRequestMessage(body: String, deliveryTag: Long)
+case class AmqpProviderRequest(body: String, deliveryTag: Long)

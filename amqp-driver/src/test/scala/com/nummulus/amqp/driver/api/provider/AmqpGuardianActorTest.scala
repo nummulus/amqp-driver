@@ -60,7 +60,7 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system")) with Fla
   it should "pass on a message that appears on the channel" in {
     autoAckGuardian ! someMessage
 
-    expectMsg(AmqpRequestMessage(someMessageBody, someDeliveryTag))
+    expectMsg(AmqpProviderRequest(someMessageBody, someDeliveryTag))
   }
   
   it should "never acknowledge a message, even when asked to (because RabbitMQ is responsible for that!)" in {
@@ -114,7 +114,7 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system")) with Fla
   it should "pass on a message that appears on the channel" in {
     noAckGuardian ! someMessage
 
-    expectMsg(AmqpRequestMessage(someMessageBody, someDeliveryTag))
+    expectMsg(AmqpProviderRequest(someMessageBody, someDeliveryTag))
   }
   
   it should "acknowledge a message, but only when requested to" in {

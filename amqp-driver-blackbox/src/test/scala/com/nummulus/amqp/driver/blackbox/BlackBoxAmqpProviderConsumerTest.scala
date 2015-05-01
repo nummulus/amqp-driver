@@ -8,7 +8,7 @@ import org.scalatest.OneInstancePerTest
 import org.scalatest.concurrent.ScalaFutures
 
 import com.nummulus.amqp.driver.AmqpProvider
-import com.nummulus.amqp.driver.api.provider.AmqpRequestMessage
+import com.nummulus.amqp.driver.api.provider.AmqpProviderRequest
 import com.nummulus.amqp.driver.api.provider.AmqpResponseMessage
 
 import akka.actor.ActorSystem
@@ -37,7 +37,7 @@ class BlackBoxAmqpProviderConsumerTest extends TestKit(ActorSystem("test-system"
     pc.tell(SomeMessage)
 
     probe.expectMsgPF() {
-      case AmqpRequestMessage(SomeMessage, _) => true
+      case AmqpProviderRequest(SomeMessage, _) => true
     }
     
     pc.done()
@@ -56,7 +56,7 @@ class BlackBoxAmqpProviderConsumerTest extends TestKit(ActorSystem("test-system"
     val f = pc.ask(SomeMessage)
     
     probe.expectMsgPF() {
-      case AmqpRequestMessage(SomeMessage, tag) =>
+      case AmqpProviderRequest(SomeMessage, tag) =>
         probe.sender ! AmqpResponseMessage(SomeAnswer, tag)
     }
     
@@ -71,7 +71,7 @@ class BlackBoxAmqpProviderConsumerTest extends TestKit(ActorSystem("test-system"
     pc.ask(SomeMessage)
     
     probe.expectMsgPF() {
-      case AmqpRequestMessage(SomeMessage, tag) =>
+      case AmqpProviderRequest(SomeMessage, tag) =>
         probe.sender ! AmqpResponseMessage(SomeAnswer, tag)
         probe.sender ! AmqpResponseMessage(SomeAnswer, tag)
     }
