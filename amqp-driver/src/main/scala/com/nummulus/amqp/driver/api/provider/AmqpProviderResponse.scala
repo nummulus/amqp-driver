@@ -1,7 +1,7 @@
 package com.nummulus.amqp.driver.api.provider
 
 /**
- * Represents a response message from a provider to a consumer.
+ * Response from a provider which will send it to a consumer's queue. 
  * 
  * @param body message response
  * @param deliveryTag amqp request message identifier, is ignored if auto acknowledge is enabled
