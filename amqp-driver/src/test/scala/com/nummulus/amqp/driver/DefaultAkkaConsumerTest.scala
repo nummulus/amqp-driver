@@ -8,9 +8,9 @@ import org.scalatest.Matchers
 import org.scalatest.junit.JUnitRunner
 
 import com.nummulus.amqp.driver.akka.AkkaMessageConsumer
+import com.nummulus.amqp.driver.akka.AmqpQueueMessageWithProperties
 import com.nummulus.amqp.driver.api.consumer.AmqpConsumerResponse
 import com.nummulus.amqp.driver.api.consumer.AmqpConsumerRequest
-import com.nummulus.amqp.driver.api.provider.AmqpRequestMessageWithProperties
 import com.nummulus.amqp.driver.fixture.AkkaConsumerFixture
 
 import _root_.akka.actor.ActorSystem
@@ -54,7 +54,7 @@ class DefaultAkkaConsumerTest extends TestKit(ActorSystem("test-system"))
   it should "return an AmqpConsumerResponse if a sender is specified" in new AkkaConsumerFixture {
     consumer ! AmqpConsumerRequest("request cheese", Some(self))
     
-    consumer ! AmqpRequestMessageWithProperties(
+    consumer ! AmqpQueueMessageWithProperties(
       "Camembert",
       MessageProperties(
         correlationId = someCorrelationId,
@@ -66,7 +66,7 @@ class DefaultAkkaConsumerTest extends TestKit(ActorSystem("test-system"))
   it should "return nothing if no sender is specified" in new AkkaConsumerFixture {
     consumer ! AmqpConsumerRequest("boo!", None)
     
-    consumer ! AmqpRequestMessageWithProperties(
+    consumer ! AmqpQueueMessageWithProperties(
       "Cowers in fear!",
       MessageProperties(
         correlationId = someCorrelationId,

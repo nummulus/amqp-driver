@@ -19,6 +19,7 @@
 ### Other
 
 * Moved `com.nummulus.amqp.driver.provider.AkkaMessageConsumer` to `com.nummulus.amqp.driver.akka`.
+* Renamed `AmqpRequestMessageWithProperties` to `AmqpQueueMessageWithProperties`. It stayed in the `com.nummulus.amqp.driver.akka` package as it's not specifically tied to providers.
 * Scala version upgraded from 2.10 to 2.11
 * JDK upgraded from 1.7 to 1.8
 

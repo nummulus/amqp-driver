@@ -8,7 +8,6 @@ import org.scalatest.junit._
 import org.scalatest.mock.MockitoSugar
 
 import com.nummulus.amqp.driver.MessageProperties
-import com.nummulus.amqp.driver.api.provider.AmqpRequestMessageWithProperties
 import com.rabbitmq.client.AMQP
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Envelope
@@ -31,6 +30,6 @@ class AkkaRabbitConsumerTest extends TestKit(ActorSystem("test-system")) with Fl
     
     consumer.handleDelivery("", SomeEnvelope, SomeProperties, SomeMessageBody.getBytes)
     
-    expectMsg(AmqpRequestMessageWithProperties(SomeMessageBody, MessageProperties(SomeProperties), SomeDeliveryTag))
+    expectMsg(AmqpQueueMessageWithProperties(SomeMessageBody, MessageProperties(SomeProperties), SomeDeliveryTag))
   }
 }

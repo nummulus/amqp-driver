@@ -4,6 +4,7 @@ import org.slf4j.LoggerFactory
 
 import com.nummulus.amqp.driver.Channel
 import com.nummulus.amqp.driver.MessageProperties
+import com.nummulus.amqp.driver.akka.AmqpQueueMessageWithProperties
 import com.nummulus.amqp.driver.configuration.QueueConfiguration
 
 import akka.actor.Actor
@@ -38,7 +39,7 @@ private[driver] object AmqpGuardianActorScope {
       /**
        * Handles an incoming message from the queue.
        */
-      case AmqpRequestMessageWithProperties(body, properties, deliveryTag) => {
+      case AmqpQueueMessageWithProperties(body, properties, deliveryTag) => {
         if (!autoAcknowledge) unacknowledged += deliveryTag
         if (properties.replyTo != null && !properties.replyTo.isEmpty) unanswered += (deliveryTag -> properties)
 

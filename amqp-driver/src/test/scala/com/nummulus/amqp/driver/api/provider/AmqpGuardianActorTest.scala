@@ -1,7 +1,6 @@
 package com.nummulus.amqp.driver.api.provider
 
 import scala.concurrent.duration._
-
 import org.junit.runner.RunWith
 import org.mockito.Matchers._
 import org.mockito.Mockito._
@@ -11,12 +10,11 @@ import org.scalatest.Matchers
 import org.scalatest.OneInstancePerTest
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
-
 import com.nummulus.amqp.driver.Channel
 import com.nummulus.amqp.driver.MessageProperties
+import com.nummulus.amqp.driver.akka.AmqpQueueMessageWithProperties
 import com.nummulus.amqp.driver.api.provider.AmqpGuardianActorScope._
 import com.nummulus.amqp.driver.configuration.QueueConfiguration
-
 import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.PoisonPill
@@ -227,8 +225,8 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system")) with Fla
     guardian
   }
   
-  private def createMessage(messageBody: String = someMessageBody, correlationId: String = someCorrelationId, replyTo: String = someReplyTo, deliveryTag: Long = someDeliveryTag): AmqpRequestMessageWithProperties =
-    AmqpRequestMessageWithProperties(someMessageBody, MessageProperties(correlationId = correlationId, replyTo = replyTo), someDeliveryTag)
+  private def createMessage(messageBody: String = someMessageBody, correlationId: String = someCorrelationId, replyTo: String = someReplyTo, deliveryTag: Long = someDeliveryTag): AmqpQueueMessageWithProperties =
+    AmqpQueueMessageWithProperties(someMessageBody, MessageProperties(correlationId = correlationId, replyTo = replyTo), someDeliveryTag)
   
   private def createResponse(messageBody: String = someResponseBody, deliveryTag: Long = someDeliveryTag): AmqpProviderResponse =
     AmqpProviderResponse(someResponseBody, someDeliveryTag)

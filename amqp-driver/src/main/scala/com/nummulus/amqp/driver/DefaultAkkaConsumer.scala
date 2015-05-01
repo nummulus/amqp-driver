@@ -4,9 +4,9 @@ import org.slf4j.LoggerFactory
 
 import com.nummulus.amqp.driver.IdGenerators._
 import com.nummulus.amqp.driver.akka.AkkaMessageConsumer
+import com.nummulus.amqp.driver.akka.AmqpQueueMessageWithProperties
 import com.nummulus.amqp.driver.api.consumer.AmqpConsumerRequest
 import com.nummulus.amqp.driver.api.consumer.AmqpConsumerResponse
-import com.nummulus.amqp.driver.api.provider.AmqpRequestMessageWithProperties
 import com.nummulus.amqp.driver.configuration.QueueConfiguration
 
 import _root_.akka.actor.Actor
@@ -49,7 +49,7 @@ class DefaultAkkaConsumer(
     /**
      * Handles an incoming response from the queue.
      */
-    case AmqpRequestMessageWithProperties(body, properties, deliveryTag) => {
+    case AmqpQueueMessageWithProperties(body, properties, deliveryTag) => {
       logger.info("Received a response from the service")
       val correlationId = properties.correlationId
       
