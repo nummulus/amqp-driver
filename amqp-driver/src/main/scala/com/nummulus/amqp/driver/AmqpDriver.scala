@@ -13,7 +13,7 @@ trait AmqpDriver {
    * @param operation name of the operation to consume
    * @return new consumer
    */
-  def newAkkaConsumer(service: String, operation: String): ActorRef
+  def newConsumer(service: String, operation: String): ActorRef
   
   /**
    * Returns a new provider for a services' operation.

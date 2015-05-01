@@ -30,7 +30,7 @@ private[driver] class DefaultDriver(connectionFactory: ConnectionFactory, config
    * @param operation name of the operation to consume
    * @return new consumer
    */
-  def newAkkaConsumer(service: String, operation: String): ActorRef = {
+  override def newConsumer(service: String, operation: String): ActorRef = {
     logger.info(s"Retrieving configuration for operation '$operation' on service '$service'")
     val queueConfiguration = getConsumerQueueConfiguration(rootConfig, service, operation)
     

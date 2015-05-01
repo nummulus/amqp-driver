@@ -12,7 +12,7 @@ private[blackbox] class BlackBoxAmqpDriver(system: ActorSystem) extends AmqpDriv
   /**
    * Not yet implemented.
    */
-  def newAkkaConsumer(service: String, operation: String): ActorRef = ???
+  def newConsumer(service: String, operation: String): ActorRef = ???
 
   /**
    * Returns the singleton black box provider, regardless of operation.
