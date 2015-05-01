@@ -9,7 +9,7 @@ import org.scalatest.concurrent.ScalaFutures
 
 import com.nummulus.amqp.driver.AmqpProvider
 import com.nummulus.amqp.driver.api.provider.AmqpProviderRequest
-import com.nummulus.amqp.driver.api.provider.AmqpResponseMessage
+import com.nummulus.amqp.driver.api.provider.AmqpProviderResponse
 
 import akka.actor.ActorSystem
 import akka.testkit.TestKit
@@ -57,7 +57,7 @@ class BlackBoxAmqpProviderConsumerTest extends TestKit(ActorSystem("test-system"
     
     probe.expectMsgPF() {
       case AmqpProviderRequest(SomeMessage, tag) =>
-        probe.sender ! AmqpResponseMessage(SomeAnswer, tag)
+        probe.sender ! AmqpProviderResponse(SomeAnswer, tag)
     }
     
     whenReady(f) { _ should be (SomeAnswer) }
@@ -72,8 +72,8 @@ class BlackBoxAmqpProviderConsumerTest extends TestKit(ActorSystem("test-system"
     
     probe.expectMsgPF() {
       case AmqpProviderRequest(SomeMessage, tag) =>
-        probe.sender ! AmqpResponseMessage(SomeAnswer, tag)
-        probe.sender ! AmqpResponseMessage(SomeAnswer, tag)
+        probe.sender ! AmqpProviderResponse(SomeAnswer, tag)
+        probe.sender ! AmqpProviderResponse(SomeAnswer, tag)
     }
     
     val thrown = the [IllegalStateException] thrownBy pc.done()

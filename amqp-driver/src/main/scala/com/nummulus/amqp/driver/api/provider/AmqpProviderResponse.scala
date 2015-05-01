@@ -6,4 +6,4 @@ package com.nummulus.amqp.driver.api.provider
  * @param body message response
  * @param deliveryTag amqp request message identifier, is ignored if auto acknowledge is enabled
  */
-case class AmqpResponseMessage(body: String, deliveryTag: Long = -1)
+case class AmqpProviderResponse(body: String, deliveryTag: Long = -1)

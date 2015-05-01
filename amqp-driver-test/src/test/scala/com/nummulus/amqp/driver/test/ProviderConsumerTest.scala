@@ -11,7 +11,7 @@ import org.scalatest.prop.TableDrivenPropertyChecks
 import com.nummulus.amqp.driver.api.consumer.AmqpConsumerRequest
 import com.nummulus.amqp.driver.api.consumer.AmqpConsumerResponse
 import com.nummulus.amqp.driver.api.provider.AmqpProviderRequest
-import com.nummulus.amqp.driver.api.provider.AmqpResponseMessage
+import com.nummulus.amqp.driver.api.provider.AmqpProviderResponse
 import com.nummulus.amqp.driver.fixture.ProviderConsumerFixture
 
 import akka.actor.Actor
@@ -81,7 +81,7 @@ class ProviderConsumerTest extends TestKit(ActorSystem("test-system")) with Impl
 private class EchoActor extends Actor {
   def receive = {
     case AmqpProviderRequest(body, deliveryTag) => {
-      sender ! AmqpResponseMessage(body, deliveryTag)
+      sender ! AmqpProviderResponse(body, deliveryTag)
     }
   }
 }

@@ -230,6 +230,6 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system")) with Fla
   private def createMessage(messageBody: String = someMessageBody, correlationId: String = someCorrelationId, replyTo: String = someReplyTo, deliveryTag: Long = someDeliveryTag): AmqpRequestMessageWithProperties =
     AmqpRequestMessageWithProperties(someMessageBody, MessageProperties(correlationId = correlationId, replyTo = replyTo), someDeliveryTag)
   
-  private def createResponse(messageBody: String = someResponseBody, deliveryTag: Long = someDeliveryTag): AmqpResponseMessage =
-    AmqpResponseMessage(someResponseBody, someDeliveryTag)
+  private def createResponse(messageBody: String = someResponseBody, deliveryTag: Long = someDeliveryTag): AmqpProviderResponse =
+    AmqpProviderResponse(someResponseBody, someDeliveryTag)
 }

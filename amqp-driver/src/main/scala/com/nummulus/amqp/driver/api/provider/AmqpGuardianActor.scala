@@ -48,7 +48,7 @@ private[driver] object AmqpGuardianActorScope {
       /**
        * Handles a response message from another actor.
        */
-      case AmqpResponseMessage(message, deliveryTag) => {
+      case AmqpProviderResponse(message, deliveryTag) => {
         if (!autoAcknowledge) self ! Acknowledge(deliveryTag)
 
         if (unanswered contains deliveryTag) {
