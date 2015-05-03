@@ -17,14 +17,6 @@ import _root_.akka.testkit.TestKit
 class DefaultProviderTest extends TestKit(ActorSystem("test-system")) with FlatSpecLike with Matchers with TypeMatcher with BeforeAndAfterAll {
   behavior of "DefaultProvider"
   
-  it should "declare a request queue at construction time" in new ProviderFixture {
-    verify (channel).queueDeclare("requestQueue", true, false, false, null)
-  }
-  
-  it should "set the QOS to one" in new ProviderFixture {
-    verify (channel).basicQos(1)
-  }
-  
   it should "bind to an actor created by a callback function" in new ProviderFixture("requestQueue0") {
     var factoryCalled = false
     val factory: AmqpProvider.ActorFactory = sender => {

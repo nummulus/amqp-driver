@@ -23,11 +23,6 @@ private[driver] class DefaultProvider(
   
   private val logger = LoggerFactory.getLogger(getClass)
   
-  private val requestQueue = channel.queueDeclare(configuration.queue, configuration.durable, configuration.exclusive, configuration.autoDelete, null)
-  logger.debug("Declared request queue: {}", configuration.queue)
-  
-  channel.basicQos(1)
-  
   private var consumerTag: Option[String] = None
   private var spent: Boolean = false
   

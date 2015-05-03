@@ -24,6 +24,11 @@ private[driver] class AmqpGuardianActor(channel: Channel, consumerTag: String, c
   private var unanswered = Map[Long, MessageProperties]()
   private val autoAcknowledge = configuration.autoAcknowledge
   
+  private val requestQueue = channel.queueDeclare(configuration.queue, configuration.durable, configuration.exclusive, configuration.autoDelete, null)
+  logger.debug("Declared request queue: {}", configuration.queue)
+  
+  channel.basicQos(1)
+
   def receive = {
     case Bind(actor) =>
       context.become(bound(actor))

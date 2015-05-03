@@ -49,6 +49,18 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system"))
   
   behavior of "AmqpGuardianActor"
   
+  it should "declare a request queue at construction time" in {
+    val guardian = createGuardian(true)
+    
+    verify (channel).queueDeclare(someReplyTo, false, false, false, null)
+  }
+  
+  it should "set the QOS to one" in {
+    val guardian = createGuardian(true)
+    
+    verify (channel).basicQos(1)
+  }
+  
   it should "start consuming messages from the queue after receiving Bind" in {
     val guardian = createGuardian(true)
     
