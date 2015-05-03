@@ -3,6 +3,7 @@ package com.nummulus.amqp.driver.api.provider
 import org.slf4j.LoggerFactory
 
 import com.nummulus.amqp.driver.Channel
+import com.nummulus.amqp.driver.IdGenerators
 import com.nummulus.amqp.driver.MessageProperties
 import com.nummulus.amqp.driver.akka.AkkaMessageConsumer
 import com.nummulus.amqp.driver.akka.AmqpQueueMessageWithProperties
@@ -22,13 +23,16 @@ import akka.actor.TypedActor.PostStop
  */
 private[driver] class AmqpGuardianActor(
     channel: Channel,
-    consumerTag: String,
-    configuration: QueueConfiguration) extends Actor with PostStop {
+    configuration: QueueConfiguration,
+    generateId: IdGenerators.IdGenerator = IdGenerators.random) extends Actor with PostStop {
   
   private val logger = LoggerFactory.getLogger(getClass)
+  
+  private val consumerTag = generateId()
+  private val autoAcknowledge = configuration.autoAcknowledge
+  
   private var unacknowledged = Set[Long]()
   private var unanswered = Map[Long, MessageProperties]()
-  private val autoAcknowledge = configuration.autoAcknowledge
   
   private val requestQueue = channel.queueDeclare(configuration.queue, configuration.durable, configuration.exclusive, configuration.autoDelete, null)
   logger.debug("Declared request queue: {}", configuration.queue)

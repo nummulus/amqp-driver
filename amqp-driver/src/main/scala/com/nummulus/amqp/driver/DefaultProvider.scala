@@ -32,8 +32,7 @@ private[driver] class DefaultProvider(
       throw new IllegalStateException("Cannot bind the same provider more than once.")
     }
     
-    val tag = generateId()
-    val guardianActor = actorSystem.actorOf(Props(classOf[AmqpGuardianActor], channel, tag, configuration), configuration.queue + "Guardian")
+    val guardianActor = actorSystem.actorOf(Props(classOf[AmqpGuardianActor], channel, configuration, generateId), configuration.queue + "Guardian")
     
     val actor = createActor(guardianActor)
     guardianActor ! Bind(actor)

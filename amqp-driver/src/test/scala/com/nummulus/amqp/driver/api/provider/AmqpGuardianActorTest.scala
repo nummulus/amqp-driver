@@ -75,7 +75,7 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system"))
   
   it should "cancel the consumer if the bound actor terminates" in {
     val configuration = QueueConfiguration(someReplyTo, false, false, true, false)
-    val guardian = TestActorRef(new AmqpGuardianActor(channel, "consumerTag", configuration))
+    val guardian = TestActorRef(new AmqpGuardianActor(channel, configuration, () => "consumerTag"))
   
     val probe = TestProbe().ref
     guardian ! Bind(probe)
@@ -236,7 +236,7 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system"))
   
   private def createGuardian(autoAcknowledge: Boolean): ActorRef = {
     val configuration = QueueConfiguration(someReplyTo, false, false, true, autoAcknowledge)
-    TestActorRef(new AmqpGuardianActor(channel, "some-unique-id-string", configuration))
+    TestActorRef(new AmqpGuardianActor(channel, configuration, () => "some-unique-id-string"))
   }
   
   private def createInitializedGuardian(autoAcknowledge: Boolean): ActorRef = {
