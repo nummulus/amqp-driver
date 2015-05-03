@@ -4,15 +4,17 @@ import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 
 import com.nummulus.amqp.driver.Channel
-import com.nummulus.amqp.driver.DefaultProvider
 import com.nummulus.amqp.driver.MessageProperties
 import com.nummulus.amqp.driver.QueueDeclareOk
 import com.nummulus.amqp.driver.akka.AmqpQueueMessageWithProperties
+import com.nummulus.amqp.driver.api.provider.AmqpGuardianActor
+import com.nummulus.amqp.driver.api.provider.Bind
 import com.nummulus.amqp.driver.configuration.QueueConfiguration
 
 import akka.actor.ActorSystem
 import akka.testkit.TestProbe
 import akka.actor.ActorRef
+import akka.actor.Props
 
 class BoundProviderFixture(autoAcknowledge: Boolean) extends MockitoSugar {
   val channel = mock[Channel]
@@ -26,13 +28,9 @@ class BoundProviderFixture(autoAcknowledge: Boolean) extends MockitoSugar {
   
   implicit val system = ActorSystem("Test")
   val probe = TestProbe()
-  val provider = new DefaultProvider(system, channel, queueConfiguration)
   
-  var guardianActor: ActorRef = null
-  provider.bind(actor => {
-    guardianActor = actor
-    probe.ref
-  })
+  val guardianActor = system.actorOf(Props(classOf[AmqpGuardianActor], channel, queueConfiguration, () => "random"), queueConfiguration.queue + "Guardian")
+  guardianActor ! Bind(probe.ref)
   
   def sendMessage(deliveryTag: Int, body: String) {
     guardianActor ! AmqpQueueMessageWithProperties(body, MessageProperties(correlationId = "1e"), deliveryTag)

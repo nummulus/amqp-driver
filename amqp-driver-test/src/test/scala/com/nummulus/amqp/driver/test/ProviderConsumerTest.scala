@@ -12,6 +12,7 @@ import com.nummulus.amqp.driver.api.consumer.AmqpConsumerRequest
 import com.nummulus.amqp.driver.api.consumer.AmqpConsumerResponse
 import com.nummulus.amqp.driver.api.provider.AmqpProviderRequest
 import com.nummulus.amqp.driver.api.provider.AmqpProviderResponse
+import com.nummulus.amqp.driver.api.provider.Bind
 import com.nummulus.amqp.driver.fixture.ProviderConsumerFixture
 
 import akka.actor.Actor
@@ -42,7 +43,7 @@ class ProviderConsumerTest extends TestKit(ActorSystem("test-system")) with Impl
     
     it should "deliver a message back to the consumer" in new ProviderConsumerFixture(propertyFile) {
       val actor = system.actorOf(Props[EchoActor])
-      provider.bind(actor)
+      provider ! Bind(actor)
 
       consumer ! AmqpConsumerRequest("hello?", Some(self))
       
@@ -57,7 +58,7 @@ class ProviderConsumerTest extends TestKit(ActorSystem("test-system")) with Impl
     
     it should "ask a provider a question that arrives" in new ProviderConsumerFixture(propertyFile) {
       val probe = TestProbe()
-      provider.bind(probe.ref)
+      provider ! Bind(probe.ref)
 
       consumer ! AmqpConsumerRequest("hello?", Some(probe.ref))
       probe.expectMsg(AmqpProviderRequest("hello?", 1))
@@ -71,7 +72,7 @@ class ProviderConsumerTest extends TestKit(ActorSystem("test-system")) with Impl
     
     it should "tell a provider a message that arrives" in new ProviderConsumerFixture(propertyFile) {
       val probe = TestProbe()
-      provider.bind(probe.ref)
+      provider ! Bind(probe.ref)
 
       consumer ! AmqpConsumerRequest("I pity the fool!")
       probe.expectMsg(AmqpProviderRequest("I pity the fool!", 1))

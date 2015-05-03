@@ -5,4 +5,4 @@ import akka.actor.ActorRef
 /**
  * Request to bind the specified actor to the AmqpGuardianActor.
  */
-private[driver] case class Bind(actor: ActorRef)
+case class Bind(actor: ActorRef)

@@ -2,6 +2,7 @@ package com.nummulus.amqp.driver
 
 import org.slf4j.LoggerFactory
 
+import com.nummulus.amqp.driver.api.provider.AmqpGuardianActor
 import com.nummulus.amqp.driver.configuration.QueueConfigurer
 import com.typesafe.config.Config
 
@@ -39,18 +40,18 @@ private[driver] class DefaultDriver(connectionFactory: ConnectionFactory, config
   }
   
   /**
-   * Returns a new provider for a services' operation.
+   * Returns an actor which acts as a liaison for a services' operation.
    * 
    * @param operation name of the operation to provide
    * @return new provider
    * @throws QueueConfiguration if the queue has missing keys in the configuration file
    */
-  override def newProvider(operation: String): AmqpProvider = {
+  override def newProvider(operation: String): ActorRef = {
     logger.info(s"Retrieving configuration for operation '$operation'")
     val queueConfiguration = getProvideQueuerConfiguration(rootConfig, operation)
     
     val channel = connection.createChannel()
-    new DefaultProvider(actorSystem, channel, queueConfiguration)
+    actorSystem.actorOf(Props(classOf[AmqpGuardianActor], channel, queueConfiguration, IdGenerators.random), queueConfiguration.queue + "Guardian")
   }
   
   /**

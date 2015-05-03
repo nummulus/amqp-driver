@@ -12,6 +12,7 @@
 
 #### Breaking Changes
 
+* Removed the `AmqpProvider` in favor of an actor provider. To bind an actor send Bind(ActorRef) to the provider. Unbinding is done by shutting down the previously bound actor.
 * Renamed package `com.nummulus.amqp.driver.akka` to `com.nummulus.amqp.driver.api.provider` as it only contained provider functionality.
 * Renamed `AmqpRequestMessage` to `AmqpProviderRequest` and `AmqpResponseMessage` to `AmqpProviderResponse`, both located in `com.nummulus.amqp.driver.api.provider`.
 * Providers no longer create their own `ActorSystem`. The driver now lazily creates one which is shared by all providers and consumers.
