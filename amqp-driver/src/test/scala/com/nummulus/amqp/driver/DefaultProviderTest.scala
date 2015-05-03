@@ -41,7 +41,6 @@ class DefaultProviderTest extends TestKit(ActorSystem("test-system")) with FlatS
     provider.bind(factory)
     
     factoryCalled should be (true)
-    verifyMessageConsumption(channel)
   }
   
   it should "not receive messages after an unbind" in new ProviderFixture("requestQueue1") {

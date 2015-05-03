@@ -1,6 +1,5 @@
 package com.nummulus.amqp.driver.api.provider
 
-import scala.concurrent.duration._
 import org.junit.runner.RunWith
 import org.mockito.Matchers._
 import org.mockito.Mockito._
@@ -8,23 +7,28 @@ import org.scalatest.BeforeAndAfterAll
 import org.scalatest.FlatSpecLike
 import org.scalatest.Matchers
 import org.scalatest.OneInstancePerTest
-import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
+
 import com.nummulus.amqp.driver.Channel
+import com.nummulus.amqp.driver.MessageConsumer
 import com.nummulus.amqp.driver.MessageProperties
 import com.nummulus.amqp.driver.akka.AmqpQueueMessageWithProperties
 import com.nummulus.amqp.driver.api.provider.AmqpGuardianActorScope._
 import com.nummulus.amqp.driver.configuration.QueueConfiguration
+
 import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.PoisonPill
 import akka.testkit.TestActorRef
 import akka.testkit.TestKit
-import akka.util.Timeout
 
 @RunWith(classOf[org.scalatest.junit.JUnitRunner])
-class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system")) with FlatSpecLike with Matchers
-    with MockitoSugar with BeforeAndAfterAll with OneInstancePerTest with ScalaFutures {
+class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system"))
+    with FlatSpecLike
+    with Matchers
+    with MockitoSugar
+    with BeforeAndAfterAll
+    with OneInstancePerTest {
   
   val channel = mock[Channel]
   var ackCount = 0
@@ -41,12 +45,19 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system")) with Fla
   
   behavior of "Initialization"
   
-  it should "return an InitializationComplete message" in {
-    import _root_.akka.pattern.ask
+  it should "start consuming messages from the queue" in {
+    import org.mockito.{Matchers => MM}
+    reset(channel)
     
     val guardian = createGuardian(true)
-    val future = (guardian ? Initialize(testActor))(Timeout(2.seconds))
-    future.futureValue should be (InitializationComplete)
+    
+    guardian ! Initialize(testActor)
+    
+    verify (channel).basicConsume(
+        MM.eq(someReplyTo),
+        MM.eq(true),
+        MM.eq("some-unique-id-string"),
+        MM.any(classOf[MessageConsumer]))
   }
   
   
@@ -216,6 +227,7 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system")) with Fla
     val name = if (autoAcknowledge) "AutoAckTestGuardian" else "NoAckTestGuardian"
     val configuration = mock[QueueConfiguration]
     when (configuration.autoAcknowledge) thenReturn autoAcknowledge
+    when (configuration.queue) thenReturn someReplyTo
     TestActorRef(new AmqpGuardianActor(channel, "some-unique-id-string", configuration))
   }
   

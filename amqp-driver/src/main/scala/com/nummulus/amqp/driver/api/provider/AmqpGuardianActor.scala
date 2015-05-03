@@ -4,6 +4,7 @@ import org.slf4j.LoggerFactory
 
 import com.nummulus.amqp.driver.Channel
 import com.nummulus.amqp.driver.MessageProperties
+import com.nummulus.amqp.driver.akka.AkkaMessageConsumer
 import com.nummulus.amqp.driver.akka.AmqpQueueMessageWithProperties
 import com.nummulus.amqp.driver.configuration.QueueConfiguration
 
@@ -32,10 +33,19 @@ private[driver] object AmqpGuardianActorScope {
       case Initialize(actor) =>
         context.become(active(actor))
         context.watch(actor)
-        sender ! InitializationComplete
+        
+        self ! InitializationComplete
     }
 
     private def active(actor: ActorRef): Receive = {
+      /**
+       * Start receiving messages from the queue.
+       */
+      case InitializationComplete => {
+        val callback = new AkkaMessageConsumer(channel, self)
+        channel.basicConsume(configuration.queue, configuration.autoAcknowledge, consumerTag, callback)
+      }
+      
       /**
        * Handles an incoming message from the queue.
        */
