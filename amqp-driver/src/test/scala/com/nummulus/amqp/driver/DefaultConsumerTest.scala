@@ -18,7 +18,7 @@ import _root_.akka.testkit.ImplicitSender
 import _root_.akka.testkit.TestKit
 
 @RunWith(classOf[JUnitRunner])
-class DefaultAkkaConsumerTest extends TestKit(ActorSystem("test-system"))
+class DefaultConsumerTest extends TestKit(ActorSystem("test-system"))
     with ImplicitSender
     with FlatSpecLike
     with Matchers {

@@ -12,7 +12,7 @@ import com.nummulus.amqp.driver.configuration.QueueConfiguration
 import _root_.akka.actor.Actor
 import _root_.akka.actor.ActorRef
 
-class DefaultAkkaConsumer(
+class DefaultConsumer(
     channel: Channel,
     configuration: QueueConfiguration,
     generateId: IdGenerator = IdGenerators.random) extends Actor {

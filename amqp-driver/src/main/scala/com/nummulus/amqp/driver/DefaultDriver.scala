@@ -35,7 +35,7 @@ private[driver] class DefaultDriver(connectionFactory: ConnectionFactory, config
     val queueConfiguration = getConsumerQueueConfiguration(rootConfig, service, operation)
     
     val channel = connection.createChannel()
-    actorSystem.actorOf(Props(classOf[DefaultAkkaConsumer], channel, queueConfiguration, IdGenerators.random))
+    actorSystem.actorOf(Props(classOf[DefaultConsumer], channel, queueConfiguration, IdGenerators.random))
   }
   
   /**
