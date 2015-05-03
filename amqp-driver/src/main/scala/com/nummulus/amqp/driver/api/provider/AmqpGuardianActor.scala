@@ -35,7 +35,7 @@ private[driver] class AmqpGuardianActor(channel: Channel, consumerTag: String, c
       context.watch(actor)
       
       val callback = new AkkaMessageConsumer(channel, self)
-      channel.basicConsume(configuration.queue, configuration.autoAcknowledge, consumerTag, callback)
+      channel.basicConsume(configuration.queue, autoAcknowledge, consumerTag, callback)
   }
 
   private def bound(actor: ActorRef): Receive = {
