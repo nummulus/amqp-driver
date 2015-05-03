@@ -99,8 +99,8 @@ private[driver] class AmqpGuardianActor(
       channel.basicCancel(consumerTag)
     }
 
-    case x => {
-      logger.error("Got unknown message {}", x)
+    case unsupportedMessage => {
+      logger.error("Received unsupported message {}", unsupportedMessage)
     }
   }
 }
