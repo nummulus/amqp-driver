@@ -34,7 +34,6 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system"))
     with OneInstancePerTest {
   
   val channel = mock[Channel]
-  var ackCount = 0
 
   val someMessageBody = "some message"
   val someResponseBody = "some response"
@@ -53,7 +52,7 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system"))
   it should "declare a request queue at construction time" in {
     val guardian = createGuardian(true)
     
-    verify (channel).queueDeclare(someReplyTo, false, false, false, null)
+    verify (channel).queueDeclare(someReplyTo, false, false, true, null)
   }
   
   it should "set the QOS to one" in {
@@ -236,10 +235,7 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system"))
   }
   
   private def createGuardian(autoAcknowledge: Boolean): ActorRef = {
-    val name = if (autoAcknowledge) "AutoAckTestGuardian" else "NoAckTestGuardian"
-    val configuration = mock[QueueConfiguration]
-    when (configuration.autoAcknowledge) thenReturn autoAcknowledge
-    when (configuration.queue) thenReturn someReplyTo
+    val configuration = QueueConfiguration(someReplyTo, false, false, true, autoAcknowledge)
     TestActorRef(new AmqpGuardianActor(channel, "some-unique-id-string", configuration))
   }
   
