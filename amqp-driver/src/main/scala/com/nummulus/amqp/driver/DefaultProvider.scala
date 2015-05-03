@@ -23,7 +23,6 @@ private[driver] class DefaultProvider(
   
   private val logger = LoggerFactory.getLogger(getClass)
   
-  private var consumerTag: Option[String] = None
   private var spent: Boolean = false
   
   def bind(actor: ActorRef): Unit = bind(_ => actor)
@@ -40,8 +39,5 @@ private[driver] class DefaultProvider(
     guardianActor ! Bind(actor)
     
     spent = true
-    consumerTag = Some(tag)
   }
-  
-  def unbind(): Unit = consumerTag foreach { t => channel.basicCancel(t) }
 }

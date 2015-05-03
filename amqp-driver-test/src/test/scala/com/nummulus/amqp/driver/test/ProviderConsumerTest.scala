@@ -16,9 +16,11 @@ import com.nummulus.amqp.driver.fixture.ProviderConsumerFixture
 
 import akka.actor.Actor
 import akka.actor.ActorSystem
+import akka.actor.PoisonPill
 import akka.actor.Props
 import akka.testkit.ImplicitSender
 import akka.testkit.TestKit
+import akka.testkit.TestProbe
 
 @RunWith(classOf[JUnitRunner])
 class ProviderConsumerTest extends TestKit(ActorSystem("test-system")) with ImplicitSender with FlatSpecLike with Matchers 
@@ -39,41 +41,42 @@ class ProviderConsumerTest extends TestKit(ActorSystem("test-system")) with Impl
     behavior of "The Provider/Consumer System with configuration " + propertyFile
     
     it should "deliver a message back to the consumer" in new ProviderConsumerFixture(propertyFile) {
-      provider.bind(system.actorOf(Props[EchoActor]))
+      val actor = system.actorOf(Props[EchoActor])
+      provider.bind(actor)
 
       consumer ! AmqpConsumerRequest("hello?", Some(self))
       
       expectMsg(AmqpConsumerResponse("hello?"))
       
-      provider.unbind();
+      actor ! PoisonPill
     }
   }
   
   forAll(propertyFiles) { (propertyFile : String) =>
-    behavior of "The Consumer with configuration " + propertyFile
+    behavior of "Consumer with configuration " + propertyFile
     
     it should "ask a provider a question that arrives" in new ProviderConsumerFixture(propertyFile) {
-      provider.bind(testActor)
+      val probe = TestProbe()
+      provider.bind(probe.ref)
 
-      consumer ! AmqpConsumerRequest("hello?", Some(self))
+      consumer ! AmqpConsumerRequest("hello?", Some(probe.ref))
+      probe.expectMsg(AmqpProviderRequest("hello?", 1))
       
-      expectMsg(AmqpProviderRequest("hello?", 1))
-      
-      provider.unbind();
+      probe.ref ! PoisonPill
     }
   }
   
   forAll(propertyFiles) { (propertyFile : String) =>
-    behavior of "The Consumer with configuration " + propertyFile
+    behavior of "Consumer with configuration " + propertyFile
     
     it should "tell a provider a message that arrives" in new ProviderConsumerFixture(propertyFile) {
-      provider.bind(testActor)
+      val probe = TestProbe()
+      provider.bind(probe.ref)
 
       consumer ! AmqpConsumerRequest("I pity the fool!")
+      probe.expectMsg(AmqpProviderRequest("I pity the fool!", 1))
       
-      expectMsg(AmqpProviderRequest("I pity the fool!", 1))
-      
-      provider.unbind();
+      probe.ref ! PoisonPill
     }
   }
 }

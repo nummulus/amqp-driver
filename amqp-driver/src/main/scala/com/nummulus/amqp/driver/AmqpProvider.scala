@@ -20,11 +20,6 @@ trait AmqpProvider {
    * and sent to [[actor]].
    */
   def bind(createActor: ActorFactory): Unit
-
-  /**
-   * Unbinds the actor from the provider, and de-activates it.
-   */
-  def unbind(): Unit
 }
 
 object AmqpProvider {

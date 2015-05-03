@@ -29,22 +29,6 @@ class DefaultProviderTest extends TestKit(ActorSystem("test-system")) with FlatS
     factoryCalled should be (true)
   }
   
-  it should "not receive messages after an unbind" in new ProviderFixture("requestQueue1") {
-    provider.bind(testActor)
-    provider.unbind()
-    
-    verify (channel).basicCancel(anyString)
-  }
-  
-  it should "fail when an attempt to re-bind after unbind is made" in new ProviderFixture("requestQueue2") {
-    provider.bind(testActor)
-    provider.unbind()
-    
-    intercept[IllegalStateException] {
-      provider.bind(testActor)
-    }
-  }
-  
   def verifyMessageConsumption(channel: Channel): Unit = {
     val queueCaptor = ArgumentCaptor.forClass(classOf[String])
     val autoAcknowledgeCaptor = ArgumentCaptor.forClass(classOf[Boolean])
