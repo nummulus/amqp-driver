@@ -2,7 +2,8 @@ package com.nummulus.amqp.driver
 
 import org.slf4j.LoggerFactory
 
-import com.nummulus.amqp.driver.api.provider.AmqpGuardianActorScope._
+import com.nummulus.amqp.driver.api.provider.AmqpGuardianActor
+import com.nummulus.amqp.driver.api.provider.Bind
 import com.nummulus.amqp.driver.configuration.QueueConfiguration
 
 import AmqpProvider._
@@ -41,7 +42,7 @@ private[driver] class DefaultProvider(
     val guardianActor = actorSystem.actorOf(Props(classOf[AmqpGuardianActor], channel, tag, configuration), configuration.queue + "Guardian")
     
     val actor = createActor(guardianActor)
-    guardianActor ! Initialize(actor)
+    guardianActor ! Bind(actor)
     
     spent = true
     consumerTag = Some(tag)

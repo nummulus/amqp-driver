@@ -13,7 +13,6 @@ import com.nummulus.amqp.driver.Channel
 import com.nummulus.amqp.driver.MessageConsumer
 import com.nummulus.amqp.driver.MessageProperties
 import com.nummulus.amqp.driver.akka.AmqpQueueMessageWithProperties
-import com.nummulus.amqp.driver.api.provider.AmqpGuardianActorScope._
 import com.nummulus.amqp.driver.configuration.QueueConfiguration
 
 import akka.actor.ActorRef
@@ -51,7 +50,7 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system"))
     
     val guardian = createGuardian(true)
     
-    guardian ! Initialize(testActor)
+    guardian ! Bind(testActor)
     
     verify (channel).basicConsume(
         MM.eq(someReplyTo),
@@ -233,7 +232,7 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system"))
   
   private def createInitializedGuardian(autoAcknowledge: Boolean): ActorRef = {
     val guardian = createGuardian(autoAcknowledge)
-    guardian ! Initialize(testActor)
+    guardian ! Bind(testActor)
     guardian
   }
   
