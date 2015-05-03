@@ -16,6 +16,10 @@
 * Renamed `AmqpRequestMessage` to `AmqpProviderRequest` and `AmqpResponseMessage` to `AmqpProviderResponse`, both located in `com.nummulus.amqp.driver.api.provider`.
 * Providers no longer create their own `ActorSystem`. The driver now lazily creates one which is shared by all providers and consumers.
 
+#### New Features
+
+* The `AmqpGuardianActor` is initialized asynchronously instead of synchronously.
+
 ### Other
 
 * Moved `com.nummulus.amqp.driver.provider.AkkaMessageConsumer` to `com.nummulus.amqp.driver.akka`.
