@@ -10,7 +10,9 @@ import com.nummulus.amqp.driver.configuration.QueueConfiguration
 
 import akka.actor.Actor
 import akka.actor.ActorRef
+import akka.actor.PoisonPill
 import akka.actor.Terminated
+import akka.actor.TypedActor.PostStop
 
 /**
  * Entry point for AMQP messages to enter the Akka world.
@@ -21,7 +23,7 @@ import akka.actor.Terminated
 private[driver] class AmqpGuardianActor(
     channel: Channel,
     consumerTag: String,
-    configuration: QueueConfiguration) extends Actor {
+    configuration: QueueConfiguration) extends Actor with PostStop {
   
   private val logger = LoggerFactory.getLogger(getClass)
   private var unacknowledged = Set[Long]()
@@ -91,16 +93,26 @@ private[driver] class AmqpGuardianActor(
     }
 
     /**
-     * Handles a terminate message from the watched actor by requeueing all unacknowledged messages.
+     * Handles a terminate message from the watched actor by shutting down the
+     * message consumer and stopping the guardian actor after its mailbox is
+     * empty.
      */
     case _: Terminated => {
-      unacknowledged foreach (channel.basicNack(_, false, true))
-      unanswered = unanswered.empty
       channel.basicCancel(consumerTag)
+      
+      self ! PoisonPill
     }
-
+    
     case unsupportedMessage => {
       logger.error("Received unsupported message {}", unsupportedMessage)
     }
+  }
+  
+  /**
+   * Requeues all unacknowledged messages and empties all unanswered messages.
+   */
+  override def postStop: Unit = {
+    unacknowledged foreach (channel.basicNack(_, false, true))
+    unanswered = unanswered.empty
   }
 }

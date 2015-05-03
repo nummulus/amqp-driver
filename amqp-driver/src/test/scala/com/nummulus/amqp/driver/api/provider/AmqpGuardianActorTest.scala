@@ -22,6 +22,7 @@ import akka.actor.ActorSystem
 import akka.actor.PoisonPill
 import akka.testkit.TestActorRef
 import akka.testkit.TestKit
+import akka.testkit.TestProbe
 
 @RunWith(classOf[org.scalatest.junit.JUnitRunner])
 class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system"))
@@ -71,6 +72,18 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system"))
         matchEq(true),
         matchEq("some-unique-id-string"),
         any(classOf[MessageConsumer]))
+  }
+  
+  it should "cancel the consumer if the bound actor terminates" in {
+    val configuration = QueueConfiguration(someReplyTo, false, false, true, false)
+    val guardian = TestActorRef(new AmqpGuardianActor(channel, "consumerTag", configuration))
+  
+    val probe = TestProbe().ref
+    guardian ! Bind(probe)
+    
+    probe ! PoisonPill
+    
+    verify (channel).basicCancel(any())
   }
   
   
@@ -195,18 +208,6 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system"))
     noAckGuardian ! someResponse
     
     verifyAcknowledgeNever(someDeliveryTag)
-    verifyPublishNothing()
-  }
-  
-  it should "ignore responses if the guardian is already terminated" in {
-    noAckGuardian ! someMessage
-    testActor ! PoisonPill
-    
-    reset(channel)
-    
-    noAckGuardian ! someResponse
-
-    verifyAcknowledgeOnce(someDeliveryTag)
     verifyPublishNothing()
   }
   
