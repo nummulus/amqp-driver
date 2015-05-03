@@ -3,6 +3,7 @@ package com.nummulus.amqp.driver.api.provider
 import org.junit.runner.RunWith
 import org.mockito.Matchers._
 import org.mockito.Mockito._
+import org.scalatest.BeforeAndAfter
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.FlatSpecLike
 import org.scalatest.Matchers
@@ -26,6 +27,7 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system"))
     with FlatSpecLike
     with Matchers
     with MockitoSugar
+    with BeforeAndAfter
     with BeforeAndAfterAll
     with OneInstancePerTest {
   
@@ -40,13 +42,14 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system"))
   val someMessage = createMessage()
   val someResponse = createResponse()
   
-  
+  before {
+    reset(channel)
+  }
   
   behavior of "Initialization"
   
   it should "start consuming messages from the queue" in {
     import org.mockito.{Matchers => MM}
-    reset(channel)
     
     val guardian = createGuardian(true)
     
@@ -105,8 +108,6 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system"))
   it should "ignore responses if the guardian is already terminated" in {
     autoAckGuardian ! someMessage
     testActor ! PoisonPill
-    
-    reset(channel)
     
     autoAckGuardian ! someResponse
 
