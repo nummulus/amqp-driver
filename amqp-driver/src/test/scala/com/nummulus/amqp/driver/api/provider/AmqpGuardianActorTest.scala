@@ -1,6 +1,7 @@
 package com.nummulus.amqp.driver.api.provider
 
 import org.junit.runner.RunWith
+import org.mockito.Matchers.{eq => matchEq}
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfter
@@ -46,20 +47,18 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system"))
     reset(channel)
   }
   
-  behavior of "Initialization"
+  behavior of "AmqpGuardianActor"
   
-  it should "start consuming messages from the queue" in {
-    import org.mockito.{Matchers => MM}
-    
+  it should "start consuming messages from the queue after receiving Bind" in {
     val guardian = createGuardian(true)
     
     guardian ! Bind(testActor)
     
     verify (channel).basicConsume(
-        MM.eq(someReplyTo),
-        MM.eq(true),
-        MM.eq("some-unique-id-string"),
-        MM.any(classOf[MessageConsumer]))
+        matchEq(someReplyTo),
+        matchEq(true),
+        matchEq("some-unique-id-string"),
+        any(classOf[MessageConsumer]))
   }
   
   
