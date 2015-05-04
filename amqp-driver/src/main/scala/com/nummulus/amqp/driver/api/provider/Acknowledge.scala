@@ -1,4 +1,4 @@
-package com.nummulus.amqp.driver.akka
+package com.nummulus.amqp.driver.api.provider
 
 /**
  * Message acknowledging that a message from AMQP has been processed

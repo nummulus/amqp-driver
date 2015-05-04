@@ -25,10 +25,10 @@ class BoundProviderFixture(autoAcknowledge: Boolean) extends MockitoSugar {
   
   val queueConfiguration = QueueConfiguration("requestQueue", true, false, false, autoAcknowledge)
   
-  val provider = new DefaultProvider(channel, queueConfiguration)
   
   implicit val system = ActorSystem("Test")
   val probe = TestProbe()
+  val provider = new DefaultProvider(system, channel, queueConfiguration)
   
   provider.bind(probe.ref)
   

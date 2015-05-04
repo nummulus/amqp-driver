@@ -1,7 +1,6 @@
-package com.nummulus.amqp.driver.akka
+package com.nummulus.amqp.driver.api.provider
 
 import scala.concurrent.duration._
-
 import org.junit.runner.RunWith
 import org.mockito.Matchers._
 import org.mockito.Mockito._
@@ -11,12 +10,11 @@ import org.scalatest.Matchers
 import org.scalatest.OneInstancePerTest
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
-
 import com.nummulus.amqp.driver.Channel
 import com.nummulus.amqp.driver.MessageProperties
+import com.nummulus.amqp.driver.akka.AmqpQueueMessageWithProperties
+import com.nummulus.amqp.driver.api.provider.AmqpGuardianActorScope._
 import com.nummulus.amqp.driver.configuration.QueueConfiguration
-
-import AmqpGuardianActorScope._
 import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.PoisonPill
@@ -45,6 +43,7 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system")) with Fla
   
   it should "return an InitializationComplete message" in {
     import _root_.akka.pattern.ask
+    
     val guardian = createGuardian(true)
     val future = (guardian ? Initialize(testActor))(Timeout(2.seconds))
     future.futureValue should be (InitializationComplete)
@@ -59,7 +58,7 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system")) with Fla
   it should "pass on a message that appears on the channel" in {
     autoAckGuardian ! someMessage
 
-    expectMsg(AmqpRequestMessage(someMessageBody, someDeliveryTag))
+    expectMsg(AmqpProviderRequest(someMessageBody, someDeliveryTag))
   }
   
   it should "never acknowledge a message, even when asked to (because RabbitMQ is responsible for that!)" in {
@@ -113,7 +112,7 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system")) with Fla
   it should "pass on a message that appears on the channel" in {
     noAckGuardian ! someMessage
 
-    expectMsg(AmqpRequestMessage(someMessageBody, someDeliveryTag))
+    expectMsg(AmqpProviderRequest(someMessageBody, someDeliveryTag))
   }
   
   it should "acknowledge a message, but only when requested to" in {
@@ -226,9 +225,9 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system")) with Fla
     guardian
   }
   
-  private def createMessage(messageBody: String = someMessageBody, correlationId: String = someCorrelationId, replyTo: String = someReplyTo, deliveryTag: Long = someDeliveryTag): AmqpRequestMessageWithProperties =
-    AmqpRequestMessageWithProperties(someMessageBody, MessageProperties(correlationId = correlationId, replyTo = replyTo), someDeliveryTag)
+  private def createMessage(messageBody: String = someMessageBody, correlationId: String = someCorrelationId, replyTo: String = someReplyTo, deliveryTag: Long = someDeliveryTag): AmqpQueueMessageWithProperties =
+    AmqpQueueMessageWithProperties(someMessageBody, MessageProperties(correlationId = correlationId, replyTo = replyTo), someDeliveryTag)
   
-  private def createResponse(messageBody: String = someResponseBody, deliveryTag: Long = someDeliveryTag): AmqpResponseMessage =
-    AmqpResponseMessage(someResponseBody, someDeliveryTag)
+  private def createResponse(messageBody: String = someResponseBody, deliveryTag: Long = someDeliveryTag): AmqpProviderResponse =
+    AmqpProviderResponse(someResponseBody, someDeliveryTag)
 }

@@ -6,13 +6,17 @@ import org.scalatest.mock.MockitoSugar
 import com.nummulus.amqp.driver.Channel
 import com.nummulus.amqp.driver.DefaultConsumer
 import com.nummulus.amqp.driver.QueueDeclareOk
+import com.nummulus.amqp.driver.akka.AkkaMessageConsumer
 import com.nummulus.amqp.driver.configuration.QueueConfiguration
-import com.nummulus.amqp.driver.consumer.BlockingMessageConsumer
 
-trait ConsumerFixture extends MockitoSugar {
+import akka.actor.ActorSystem
+import akka.actor.Props
+import akka.testkit.TestActorRef
+
+class AkkaConsumerFixture(implicit system: ActorSystem) extends MockitoSugar {
   val channel = mock[Channel]
   val declareOk = mock[QueueDeclareOk]
-  val messageConsumer = mock[BlockingMessageConsumer]
+  val messageConsumer = mock[AkkaMessageConsumer]
   val someCorrelationId = "4"
   val correlationIdGenerator = () => someCorrelationId
   
@@ -22,5 +26,5 @@ trait ConsumerFixture extends MockitoSugar {
   
   val queueConfiguration = QueueConfiguration("requestQueue", true, false, false, true)
   
-  val consumer = new DefaultConsumer(channel, queueConfiguration, messageConsumer, correlationIdGenerator)
+  val consumer = TestActorRef[DefaultConsumer](Props(classOf[DefaultConsumer], channel, queueConfiguration, correlationIdGenerator))
 }

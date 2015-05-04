@@ -9,4 +9,4 @@ import com.nummulus.amqp.driver.MessageProperties
  * @param properties message properties
  * @param deliveryTag amqp message identifier
  */
-private[driver] case class AmqpRequestMessageWithProperties(body: String, properties: MessageProperties, deliveryTag: Long)
+private[driver] case class AmqpQueueMessageWithProperties(body: String, properties: MessageProperties, deliveryTag: Long)

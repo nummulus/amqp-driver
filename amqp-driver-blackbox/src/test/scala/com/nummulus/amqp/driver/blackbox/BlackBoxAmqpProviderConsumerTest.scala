@@ -6,12 +6,14 @@ import org.scalatest.FlatSpecLike
 import org.scalatest.Matchers
 import org.scalatest.OneInstancePerTest
 import org.scalatest.concurrent.ScalaFutures
-import com.nummulus.amqp.driver.akka.AmqpRequestMessage
-import com.nummulus.amqp.driver.akka.AmqpResponseMessage
+
+import com.nummulus.amqp.driver.AmqpProvider
+import com.nummulus.amqp.driver.api.provider.AmqpProviderRequest
+import com.nummulus.amqp.driver.api.provider.AmqpProviderResponse
+
 import akka.actor.ActorSystem
 import akka.testkit.TestKit
 import akka.testkit.TestProbe
-import com.nummulus.amqp.driver.AmqpProvider
 
 @RunWith(classOf[org.scalatest.junit.JUnitRunner])
 class BlackBoxAmqpProviderConsumerTest extends TestKit(ActorSystem("test-system"))
@@ -35,7 +37,7 @@ class BlackBoxAmqpProviderConsumerTest extends TestKit(ActorSystem("test-system"
     pc.tell(SomeMessage)
 
     probe.expectMsgPF() {
-      case AmqpRequestMessage(SomeMessage, _) => true
+      case AmqpProviderRequest(SomeMessage, _) => true
     }
     
     pc.done()
@@ -54,8 +56,8 @@ class BlackBoxAmqpProviderConsumerTest extends TestKit(ActorSystem("test-system"
     val f = pc.ask(SomeMessage)
     
     probe.expectMsgPF() {
-      case AmqpRequestMessage(SomeMessage, tag) =>
-        probe.sender ! AmqpResponseMessage(SomeAnswer, tag)
+      case AmqpProviderRequest(SomeMessage, tag) =>
+        probe.sender ! AmqpProviderResponse(SomeAnswer, tag)
     }
     
     whenReady(f) { _ should be (SomeAnswer) }
@@ -69,9 +71,9 @@ class BlackBoxAmqpProviderConsumerTest extends TestKit(ActorSystem("test-system"
     pc.ask(SomeMessage)
     
     probe.expectMsgPF() {
-      case AmqpRequestMessage(SomeMessage, tag) =>
-        probe.sender ! AmqpResponseMessage(SomeAnswer, tag)
-        probe.sender ! AmqpResponseMessage(SomeAnswer, tag)
+      case AmqpProviderRequest(SomeMessage, tag) =>
+        probe.sender ! AmqpProviderResponse(SomeAnswer, tag)
+        probe.sender ! AmqpProviderResponse(SomeAnswer, tag)
     }
     
     val thrown = the [IllegalStateException] thrownBy pc.done()

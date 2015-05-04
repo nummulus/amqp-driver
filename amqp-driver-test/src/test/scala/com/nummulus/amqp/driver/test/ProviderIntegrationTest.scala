@@ -5,7 +5,7 @@ import org.mockito.Mockito._
 import org.scalatest._
 import org.scalatest.junit._
 
-import com.nummulus.amqp.driver.akka.AmqpRequestMessage
+import com.nummulus.amqp.driver.api.provider.AmqpProviderRequest
 import com.nummulus.amqp.driver.fixture.BoundProviderFixture
 
 @RunWith(classOf[JUnitRunner])
@@ -17,6 +17,6 @@ class ProviderIntegrationTest extends FlatSpec with Matchers {
   it should "forward a message to the provided actor" in new BoundProviderFixture(true) {
     sendMessage(SomeDeliveryTag, "Hi")
     
-    probe.expectMsg(AmqpRequestMessage("Hi", SomeDeliveryTag))
+    probe.expectMsg(AmqpProviderRequest("Hi", SomeDeliveryTag))
   }
 }

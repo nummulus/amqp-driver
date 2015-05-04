@@ -5,7 +5,6 @@ import scala.concurrent.Future
 import scala.concurrent.Promise
 import scala.concurrent.duration._
 
-import com.nummulus.amqp.driver.AmqpConsumer
 import com.nummulus.amqp.driver.AmqpProvider
 import com.nummulus.amqp.driver.AmqpProvider._
 
@@ -14,7 +13,7 @@ import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.Props
 
-private[blackbox] class BlackBoxAmqpProviderConsumer(system: ActorSystem) extends AmqpProvider with AmqpConsumer {
+private[blackbox] class BlackBoxAmqpProviderConsumer(system: ActorSystem) extends AmqpProvider {
   private var handler: Option[ActorRef] = None
   private val completed = Promise[Boolean]()
   private var alreadyDone = false

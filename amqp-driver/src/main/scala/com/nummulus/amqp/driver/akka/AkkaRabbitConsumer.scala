@@ -1,13 +1,14 @@
-package com.nummulus.amqp.driver.provider
+package com.nummulus.amqp.driver.akka
+
+import java.nio.charset.StandardCharsets
 
 import com.nummulus.amqp.driver.MessageProperties
-import com.nummulus.amqp.driver.akka.AmqpRequestMessageWithProperties
 import com.rabbitmq.client.AMQP
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.DefaultConsumer
 import com.rabbitmq.client.Envelope
+
 import akka.actor.ActorRef
-import java.nio.charset.StandardCharsets
 
 /**
  * Akka message consumer.
@@ -17,6 +18,6 @@ private[driver] class AkkaRabbitConsumer(channel: Channel, actor: ActorRef) exte
      val message = new String(body, StandardCharsets.UTF_8)
      val deliveryTag = envelope.getDeliveryTag
      
-     actor ! AmqpRequestMessageWithProperties(message, MessageProperties(properties), deliveryTag)
+     actor ! AmqpQueueMessageWithProperties(message, MessageProperties(properties), deliveryTag)
    }
 }

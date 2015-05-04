@@ -1,16 +1,17 @@
-package com.nummulus.amqp.driver.provider
+package com.nummulus.amqp.driver.akka
 
 import org.junit.runner.RunWith
 import org.scalatest.FlatSpecLike
 import org.scalatest.Matchers
 import org.scalatest.OneInstancePerTest
-import org.scalatest.junit.JUnitRunner
+import org.scalatest.junit._
 import org.scalatest.mock.MockitoSugar
+
 import com.nummulus.amqp.driver.MessageProperties
-import com.nummulus.amqp.driver.akka.AmqpRequestMessageWithProperties
 import com.rabbitmq.client.AMQP
 import com.rabbitmq.client.Channel
 import com.rabbitmq.client.Envelope
+
 import akka.actor.ActorSystem
 import akka.testkit.TestKit
 
@@ -29,6 +30,6 @@ class AkkaRabbitConsumerTest extends TestKit(ActorSystem("test-system")) with Fl
     
     consumer.handleDelivery("", SomeEnvelope, SomeProperties, SomeMessageBody.getBytes)
     
-    expectMsg(AmqpRequestMessageWithProperties(SomeMessageBody, MessageProperties(SomeProperties), SomeDeliveryTag))
+    expectMsg(AmqpQueueMessageWithProperties(SomeMessageBody, MessageProperties(SomeProperties), SomeDeliveryTag))
   }
 }

@@ -5,9 +5,9 @@ import scala.concurrent.duration._
 
 import org.slf4j.LoggerFactory
 
-import com.nummulus.amqp.driver.akka.AmqpGuardianActorScope._
+import com.nummulus.amqp.driver.akka.AkkaMessageConsumer
+import com.nummulus.amqp.driver.api.provider.AmqpGuardianActorScope._
 import com.nummulus.amqp.driver.configuration.QueueConfiguration
-import com.nummulus.amqp.driver.provider.AkkaMessageConsumer
 
 import AmqpProvider._
 import IdGenerators._
@@ -20,12 +20,12 @@ import _root_.akka.util.Timeout
  * Default provider implementation.
  */
 private[driver] class DefaultProvider(
+    actorSystem: ActorSystem,
     channel: Channel, 
     configuration: QueueConfiguration, 
     generateId: IdGenerator = IdGenerators.random) extends AmqpProvider {
   
   private val logger = LoggerFactory.getLogger(getClass)
-  private lazy val actorSystem = ActorSystem("AmqpDriver")
   
   private val requestQueue = channel.queueDeclare(configuration.queue, configuration.durable, configuration.exclusive, configuration.autoDelete, null)
   logger.debug("Declared request queue: {}", configuration.queue)

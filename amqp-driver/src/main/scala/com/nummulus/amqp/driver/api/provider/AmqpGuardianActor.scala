@@ -1,12 +1,15 @@
-package com.nummulus.amqp.driver.akka
+package com.nummulus.amqp.driver.api.provider
+
+import org.slf4j.LoggerFactory
 
 import com.nummulus.amqp.driver.Channel
 import com.nummulus.amqp.driver.MessageProperties
+import com.nummulus.amqp.driver.akka.AmqpQueueMessageWithProperties
 import com.nummulus.amqp.driver.configuration.QueueConfiguration
+
 import akka.actor.Actor
 import akka.actor.ActorRef
 import akka.actor.Terminated
-import org.slf4j.LoggerFactory
 
 /**
  * Entry point for AMQP messages to enter the Akka world.
@@ -36,17 +39,17 @@ private[driver] object AmqpGuardianActorScope {
       /**
        * Handles an incoming message from the queue.
        */
-      case AmqpRequestMessageWithProperties(body, properties, deliveryTag) => {
+      case AmqpQueueMessageWithProperties(body, properties, deliveryTag) => {
         if (!autoAcknowledge) unacknowledged += deliveryTag
         if (properties.replyTo != null && !properties.replyTo.isEmpty) unanswered += (deliveryTag -> properties)
 
-        actor ! AmqpRequestMessage(body, deliveryTag)
+        actor ! AmqpProviderRequest(body, deliveryTag)
       }
 
       /**
        * Handles a response message from another actor.
        */
-      case AmqpResponseMessage(message, deliveryTag) => {
+      case AmqpProviderResponse(message, deliveryTag) => {
         if (!autoAcknowledge) self ! Acknowledge(deliveryTag)
 
         if (unanswered contains deliveryTag) {

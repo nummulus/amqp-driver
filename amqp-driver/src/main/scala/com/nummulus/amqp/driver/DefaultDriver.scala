@@ -1,11 +1,13 @@
 package com.nummulus.amqp.driver
 
 import org.slf4j.LoggerFactory
-import com.nummulus.amqp.driver.configuration.ConfigurationException
-import com.nummulus.amqp.driver.configuration.QueueConfiguration
-import com.typesafe.config.Config
-import com.typesafe.config.ConfigException
+
 import com.nummulus.amqp.driver.configuration.QueueConfigurer
+import com.typesafe.config.Config
+
+import _root_.akka.actor.ActorRef
+import _root_.akka.actor.ActorSystem
+import _root_.akka.actor.Props
 
 /**
  * Default driver implementation.
@@ -18,24 +20,22 @@ private[driver] class DefaultDriver(connectionFactory: ConnectionFactory, config
   private val logger = LoggerFactory.getLogger(getClass)
   private val rootConfig = config.getConfig("amqp")
   
+  private lazy val actorSystem = ActorSystem("AmqpDriver")
   private lazy val connection = createConnection()
   
   /**
-   * Creates a new consumer for the specified service operation.
+   * Returns an actor which can communicate with the services' operation.
    * 
-   * If no connection to the broker is available, one will be established.
-   * 
-   * @param service owner of the operation
-   * @param operation operation name of the operation to invoke
+   * @param service name of the service owning the operation to consume
+   * @param operation name of the operation to consume
    * @return new consumer
-   * @throws QueueConfiguration if the queue has missing keys in the configuration file
    */
-  override def newConsumer(service: String, operation: String): AmqpConsumer = {
+  override def newConsumer(service: String, operation: String): ActorRef = {
     logger.info(s"Retrieving configuration for operation '$operation' on service '$service'")
     val queueConfiguration = getConsumerQueueConfiguration(rootConfig, service, operation)
     
     val channel = connection.createChannel()
-    new DefaultConsumer(channel, queueConfiguration, MessageConsumer.newBlocking(channel))
+    actorSystem.actorOf(Props(classOf[DefaultConsumer], channel, queueConfiguration, IdGenerators.random))
   }
   
   /**
@@ -50,7 +50,7 @@ private[driver] class DefaultDriver(connectionFactory: ConnectionFactory, config
     val queueConfiguration = getProvideQueuerConfiguration(rootConfig, operation)
     
     val channel = connection.createChannel()
-    new DefaultProvider(channel, queueConfiguration)
+    new DefaultProvider(actorSystem, channel, queueConfiguration)
   }
   
   /**
