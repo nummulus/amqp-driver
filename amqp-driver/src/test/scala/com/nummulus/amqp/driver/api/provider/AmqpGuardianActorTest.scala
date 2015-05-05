@@ -37,6 +37,7 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system"))
 
   val someMessageBody = "some message"
   val someResponseBody = "some response"
+  val someConsumerTag = "consumerTag"
   val someCorrelationId = "some correlation"
   val someReplyTo = "some Rabbit channel"
   val someDeliveryTag = 42L
@@ -75,14 +76,14 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system"))
   
   it should "cancel the consumer if the bound actor terminates" in {
     val configuration = QueueConfiguration(someReplyTo, false, false, true, false)
-    val guardian = TestActorRef(new AmqpGuardianActor(channel, configuration, () => "consumerTag"))
+    val guardian = TestActorRef(new AmqpGuardianActor(channel, configuration, () => someConsumerTag))
   
     val probe = TestProbe().ref
     guardian ! Bind(probe)
     
     probe ! PoisonPill
     
-    verify (channel).basicCancel(any())
+    verify (channel).basicCancel(someConsumerTag)
   }
   
   
