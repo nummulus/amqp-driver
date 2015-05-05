@@ -1,12 +1,9 @@
 package com.nummulus.amqp.driver
 
-import scala.concurrent.Await
-import scala.concurrent.duration._
-
 import org.slf4j.LoggerFactory
 
-import com.nummulus.amqp.driver.akka.AkkaMessageConsumer
-import com.nummulus.amqp.driver.api.provider.AmqpGuardianActorScope._
+import com.nummulus.amqp.driver.api.provider.AmqpGuardianActor
+import com.nummulus.amqp.driver.api.provider.Bind
 import com.nummulus.amqp.driver.configuration.QueueConfiguration
 
 import AmqpProvider._
@@ -14,7 +11,6 @@ import IdGenerators._
 import _root_.akka.actor.ActorRef
 import _root_.akka.actor.ActorSystem
 import _root_.akka.actor.Props
-import _root_.akka.util.Timeout
 
 /**
  * Default provider implementation.
@@ -44,34 +40,13 @@ private[driver] class DefaultProvider(
     
     val tag = generateId()
     val guardianActor = actorSystem.actorOf(Props(classOf[AmqpGuardianActor], channel, tag, configuration), configuration.queue + "Guardian")
-    val callback = new AkkaMessageConsumer(channel, guardianActor)
+    
     val actor = createActor(guardianActor)
-    initializeSynchronously(guardianActor, actor)
+    guardianActor ! Bind(actor)
     
     spent = true
     consumerTag = Some(tag)
-    channel.basicConsume(configuration.queue, configuration.autoAcknowledge, tag, callback)
   }
   
   def unbind(): Unit = consumerTag foreach { t => channel.basicCancel(t) }
-  
-  /**
-   * Initializes the guardian actor synchronously.
-   * 
-   * This is needed because there is a theoretical possibility of a race condition.
-   * If the Initialize message is sent, but for some reason takes a long time to
-   * arrive, and if messages were already present on the AMQP queue, there is a
-   * theoretical possibility that messages from the queue arrive at the AmqpGuardianActor
-   * before the Initialize message does. In that case, the message will get lost.
-   * This may or may not be a problem.
-   * 
-   * In order to prevent this issue, we make sure that Initialize is executed
-   * synchronously.
-   */
-  private def initializeSynchronously(guardianActor: ActorRef, actor: ActorRef): Unit = {
-    import _root_.akka.pattern.ask
-    val duration = 2.seconds
-    val future = (guardianActor ? Initialize(actor))(Timeout(duration))
-    Await.ready(future, duration)
-  }
 }

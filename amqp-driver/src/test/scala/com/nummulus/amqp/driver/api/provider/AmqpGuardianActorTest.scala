@@ -1,30 +1,36 @@
 package com.nummulus.amqp.driver.api.provider
 
-import scala.concurrent.duration._
 import org.junit.runner.RunWith
+import org.mockito.Matchers.{eq => matchEq}
 import org.mockito.Matchers._
 import org.mockito.Mockito._
+import org.scalatest.BeforeAndAfter
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.FlatSpecLike
 import org.scalatest.Matchers
 import org.scalatest.OneInstancePerTest
-import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
+
 import com.nummulus.amqp.driver.Channel
+import com.nummulus.amqp.driver.MessageConsumer
 import com.nummulus.amqp.driver.MessageProperties
 import com.nummulus.amqp.driver.akka.AmqpQueueMessageWithProperties
-import com.nummulus.amqp.driver.api.provider.AmqpGuardianActorScope._
 import com.nummulus.amqp.driver.configuration.QueueConfiguration
+
 import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.actor.PoisonPill
 import akka.testkit.TestActorRef
 import akka.testkit.TestKit
-import akka.util.Timeout
 
 @RunWith(classOf[org.scalatest.junit.JUnitRunner])
-class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system")) with FlatSpecLike with Matchers
-    with MockitoSugar with BeforeAndAfterAll with OneInstancePerTest with ScalaFutures {
+class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system"))
+    with FlatSpecLike
+    with Matchers
+    with MockitoSugar
+    with BeforeAndAfter
+    with BeforeAndAfterAll
+    with OneInstancePerTest {
   
   val channel = mock[Channel]
   var ackCount = 0
@@ -37,16 +43,22 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system")) with Fla
   val someMessage = createMessage()
   val someResponse = createResponse()
   
+  before {
+    reset(channel)
+  }
   
+  behavior of "AmqpGuardianActor"
   
-  behavior of "Initialization"
-  
-  it should "return an InitializationComplete message" in {
-    import _root_.akka.pattern.ask
-    
+  it should "start consuming messages from the queue after receiving Bind" in {
     val guardian = createGuardian(true)
-    val future = (guardian ? Initialize(testActor))(Timeout(2.seconds))
-    future.futureValue should be (InitializationComplete)
+    
+    guardian ! Bind(testActor)
+    
+    verify (channel).basicConsume(
+        matchEq(someReplyTo),
+        matchEq(true),
+        matchEq("some-unique-id-string"),
+        any(classOf[MessageConsumer]))
   }
   
   
@@ -95,8 +107,6 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system")) with Fla
   it should "ignore responses if the guardian is already terminated" in {
     autoAckGuardian ! someMessage
     testActor ! PoisonPill
-    
-    reset(channel)
     
     autoAckGuardian ! someResponse
 
@@ -216,12 +226,13 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system")) with Fla
     val name = if (autoAcknowledge) "AutoAckTestGuardian" else "NoAckTestGuardian"
     val configuration = mock[QueueConfiguration]
     when (configuration.autoAcknowledge) thenReturn autoAcknowledge
+    when (configuration.queue) thenReturn someReplyTo
     TestActorRef(new AmqpGuardianActor(channel, "some-unique-id-string", configuration))
   }
   
   private def createInitializedGuardian(autoAcknowledge: Boolean): ActorRef = {
     val guardian = createGuardian(autoAcknowledge)
-    guardian ! Initialize(testActor)
+    guardian ! Bind(testActor)
     guardian
   }
   

@@ -25,12 +25,6 @@ class DefaultProviderTest extends TestKit(ActorSystem("test-system")) with FlatS
     verify (channel).basicQos(1)
   }
   
-  it should "consume messages from the queue after calling bind" in new ProviderFixture {
-    provider.bind(testActor)
-    
-    verifyMessageConsumption(channel)
-  }
-  
   it should "bind to an actor created by a callback function" in new ProviderFixture("requestQueue0") {
     var factoryCalled = false
     val factory: AmqpProvider.ActorFactory = sender => {
@@ -41,7 +35,6 @@ class DefaultProviderTest extends TestKit(ActorSystem("test-system")) with FlatS
     provider.bind(factory)
     
     factoryCalled should be (true)
-    verifyMessageConsumption(channel)
   }
   
   it should "not receive messages after an unbind" in new ProviderFixture("requestQueue1") {

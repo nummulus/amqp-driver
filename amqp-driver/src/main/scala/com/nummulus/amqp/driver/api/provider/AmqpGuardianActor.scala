@@ -4,6 +4,7 @@ import org.slf4j.LoggerFactory
 
 import com.nummulus.amqp.driver.Channel
 import com.nummulus.amqp.driver.MessageProperties
+import com.nummulus.amqp.driver.akka.AkkaMessageConsumer
 import com.nummulus.amqp.driver.akka.AmqpQueueMessageWithProperties
 import com.nummulus.amqp.driver.configuration.QueueConfiguration
 
@@ -17,84 +18,80 @@ import akka.actor.Terminated
  * Monitors the actor which it sends messages to. If the monitored actor dies,
  * all unacknowledged messages will be requeued.
  */
-private[driver] object AmqpGuardianActorScope {
+private[driver] class AmqpGuardianActor(channel: Channel, consumerTag: String, configuration: QueueConfiguration) extends Actor {
+  private val logger = LoggerFactory.getLogger(getClass)
+  private var unacknowledged = Set[Long]()
+  private var unanswered = Map[Long, MessageProperties]()
+  private val autoAcknowledge = configuration.autoAcknowledge
   
-  case class Initialize(actor: ActorRef)
-  case object InitializationComplete
+  def receive = {
+    case Bind(actor) =>
+      context.become(bound(actor))
+      context.watch(actor)
+      
+      val callback = new AkkaMessageConsumer(channel, self)
+      channel.basicConsume(configuration.queue, configuration.autoAcknowledge, consumerTag, callback)
+  }
 
-  class AmqpGuardianActor(channel: Channel, consumerTag: String, configuration: QueueConfiguration) extends Actor {
-    private val logger = LoggerFactory.getLogger(getClass)
-    private var unacknowledged = Set[Long]()
-    private var unanswered = Map[Long, MessageProperties]()
-    private val autoAcknowledge = configuration.autoAcknowledge
+  private def bound(actor: ActorRef): Receive = {
+    /**
+     * Handles an incoming message from the queue.
+     */
+    case AmqpQueueMessageWithProperties(body, properties, deliveryTag) => {
+      if (!autoAcknowledge) unacknowledged += deliveryTag
+      if (properties.replyTo != null && !properties.replyTo.isEmpty) unanswered += (deliveryTag -> properties)
 
-    def receive = {
-      case Initialize(actor) =>
-        context.become(active(actor))
-        context.watch(actor)
-        sender ! InitializationComplete
+      actor ! AmqpProviderRequest(body, deliveryTag)
     }
 
-    private def active(actor: ActorRef): Receive = {
-      /**
-       * Handles an incoming message from the queue.
-       */
-      case AmqpQueueMessageWithProperties(body, properties, deliveryTag) => {
-        if (!autoAcknowledge) unacknowledged += deliveryTag
-        if (properties.replyTo != null && !properties.replyTo.isEmpty) unanswered += (deliveryTag -> properties)
+    /**
+     * Handles a response message from another actor.
+     */
+    case AmqpProviderResponse(message, deliveryTag) => {
+      if (!autoAcknowledge) self ! Acknowledge(deliveryTag)
 
-        actor ! AmqpProviderRequest(body, deliveryTag)
+      if (unanswered contains deliveryTag) {
+        val requestProperties = unanswered(deliveryTag)
+        unanswered -= deliveryTag
+
+        val responseProperties = MessageProperties(correlationId = requestProperties.correlationId)
+
+        channel.basicPublish("", requestProperties.replyTo, responseProperties, message.getBytes)
       }
+      else {
+        logger.warn("Did not expect Response for deliveryTag {}: message was either fire-and-forget or already responded to", deliveryTag)
+      }
+    }
 
-      /**
-       * Handles a response message from another actor.
-       */
-      case AmqpProviderResponse(message, deliveryTag) => {
-        if (!autoAcknowledge) self ! Acknowledge(deliveryTag)
-
-        if (unanswered contains deliveryTag) {
-          val requestProperties = unanswered(deliveryTag)
-          unanswered -= deliveryTag
-
-          val responseProperties = MessageProperties(correlationId = requestProperties.correlationId)
-
-          channel.basicPublish("", requestProperties.replyTo, responseProperties, message.getBytes)
+    /**
+     * Handles an acknowledge message from another actor.
+     */
+    case Acknowledge(deliveryTag) => {
+      if (!autoAcknowledge) {
+        if (unacknowledged contains deliveryTag) {
+          unacknowledged -= deliveryTag
+          channel.basicAck(deliveryTag, false)
         }
         else {
-          logger.warn("Did not expect Response for deliveryTag {}: message was either fire-and-forget or already responded to", deliveryTag)
+          logger.warn("Message with deliveryTag {} was already acknowledged", deliveryTag)
         }
       }
-
-      /**
-       * Handles an acknowledge message from another actor.
-       */
-      case Acknowledge(deliveryTag) => {
-        if (!autoAcknowledge) {
-          if (unacknowledged contains deliveryTag) {
-            unacknowledged -= deliveryTag
-            channel.basicAck(deliveryTag, false)
-          }
-          else {
-            logger.warn("Message with deliveryTag {} was already acknowledged", deliveryTag)
-          }
-        }
-        else {
-          logger.warn("Did not expect Acknowledge for autoAcknowledge channel (deliveryTag={})", deliveryTag)
-        }
+      else {
+        logger.warn("Did not expect Acknowledge for autoAcknowledge channel (deliveryTag={})", deliveryTag)
       }
+    }
 
-      /**
-       * Handles a terminate message from the watched actor by requeueing all unacknowledged messages.
-       */
-      case _: Terminated => {
-        unacknowledged foreach (channel.basicNack(_, false, true))
-        unanswered = unanswered.empty
-        channel.basicCancel(consumerTag)
-      }
+    /**
+     * Handles a terminate message from the watched actor by requeueing all unacknowledged messages.
+     */
+    case _: Terminated => {
+      unacknowledged foreach (channel.basicNack(_, false, true))
+      unanswered = unanswered.empty
+      channel.basicCancel(consumerTag)
+    }
 
-      case x => {
-        logger.error("Got unknown message {}", x)
-      }
+    case x => {
+      logger.error("Got unknown message {}", x)
     }
   }
 }
