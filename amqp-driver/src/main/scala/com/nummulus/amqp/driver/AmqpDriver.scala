@@ -16,10 +16,10 @@ trait AmqpDriver {
   def newConsumer(service: String, operation: String): ActorRef
   
   /**
-   * Returns a new provider for a services' operation.
+   * Returns an actor which acts as a liaison for a services' operation.
    * 
    * @param operation name of the operation to provide
    * @return new provider
    */
-  def newProvider(operation: String): AmqpProvider
+  def newProvider(operation: String): ActorRef
 }

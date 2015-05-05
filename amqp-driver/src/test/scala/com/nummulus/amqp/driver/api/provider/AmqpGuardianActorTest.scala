@@ -22,6 +22,7 @@ import akka.actor.ActorSystem
 import akka.actor.PoisonPill
 import akka.testkit.TestActorRef
 import akka.testkit.TestKit
+import akka.testkit.TestProbe
 
 @RunWith(classOf[org.scalatest.junit.JUnitRunner])
 class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system"))
@@ -33,10 +34,10 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system"))
     with OneInstancePerTest {
   
   val channel = mock[Channel]
-  var ackCount = 0
 
   val someMessageBody = "some message"
   val someResponseBody = "some response"
+  val someConsumerTag = "consumerTag"
   val someCorrelationId = "some correlation"
   val someReplyTo = "some Rabbit channel"
   val someDeliveryTag = 42L
@@ -49,6 +50,18 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system"))
   
   behavior of "AmqpGuardianActor"
   
+  it should "declare a request queue at construction time" in {
+    val guardian = createGuardian(true)
+    
+    verify (channel).queueDeclare(someReplyTo, false, false, true, null)
+  }
+  
+  it should "set the QOS to one" in {
+    val guardian = createGuardian(true)
+    
+    verify (channel).basicQos(1)
+  }
+  
   it should "start consuming messages from the queue after receiving Bind" in {
     val guardian = createGuardian(true)
     
@@ -59,6 +72,18 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system"))
         matchEq(true),
         matchEq("some-unique-id-string"),
         any(classOf[MessageConsumer]))
+  }
+  
+  it should "cancel the consumer if the bound actor terminates" in {
+    val configuration = QueueConfiguration(someReplyTo, false, false, true, false)
+    val guardian = TestActorRef(new AmqpGuardianActor(channel, configuration, () => someConsumerTag))
+  
+    val probe = TestProbe().ref
+    guardian ! Bind(probe)
+    
+    probe ! PoisonPill
+    
+    verify (channel).basicCancel(someConsumerTag)
   }
   
   
@@ -186,18 +211,6 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system"))
     verifyPublishNothing()
   }
   
-  it should "ignore responses if the guardian is already terminated" in {
-    noAckGuardian ! someMessage
-    testActor ! PoisonPill
-    
-    reset(channel)
-    
-    noAckGuardian ! someResponse
-
-    verifyAcknowledgeOnce(someDeliveryTag)
-    verifyPublishNothing()
-  }
-  
   
   
   override def afterAll: Unit = {
@@ -223,11 +236,8 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system"))
   }
   
   private def createGuardian(autoAcknowledge: Boolean): ActorRef = {
-    val name = if (autoAcknowledge) "AutoAckTestGuardian" else "NoAckTestGuardian"
-    val configuration = mock[QueueConfiguration]
-    when (configuration.autoAcknowledge) thenReturn autoAcknowledge
-    when (configuration.queue) thenReturn someReplyTo
-    TestActorRef(new AmqpGuardianActor(channel, "some-unique-id-string", configuration))
+    val configuration = QueueConfiguration(someReplyTo, false, false, true, autoAcknowledge)
+    TestActorRef(new AmqpGuardianActor(channel, configuration, () => "some-unique-id-string"))
   }
   
   private def createInitializedGuardian(autoAcknowledge: Boolean): ActorRef = {

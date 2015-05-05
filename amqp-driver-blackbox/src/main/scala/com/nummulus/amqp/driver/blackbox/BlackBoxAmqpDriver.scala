@@ -17,7 +17,7 @@ private[blackbox] class BlackBoxAmqpDriver(system: ActorSystem) extends AmqpDriv
   /**
    * Returns the singleton black box provider, regardless of operation.
    */
-  def newProvider(operation: String): AmqpProvider = providerConsumer
+  def newProvider(operation: String): ActorRef = providerConsumer.provider()
 
   private[blackbox] def done() = providerConsumer.done()
 }

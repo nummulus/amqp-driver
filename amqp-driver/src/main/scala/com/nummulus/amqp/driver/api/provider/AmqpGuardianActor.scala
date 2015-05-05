@@ -3,6 +3,7 @@ package com.nummulus.amqp.driver.api.provider
 import org.slf4j.LoggerFactory
 
 import com.nummulus.amqp.driver.Channel
+import com.nummulus.amqp.driver.IdGenerators
 import com.nummulus.amqp.driver.MessageProperties
 import com.nummulus.amqp.driver.akka.AkkaMessageConsumer
 import com.nummulus.amqp.driver.akka.AmqpQueueMessageWithProperties
@@ -10,7 +11,9 @@ import com.nummulus.amqp.driver.configuration.QueueConfiguration
 
 import akka.actor.Actor
 import akka.actor.ActorRef
+import akka.actor.PoisonPill
 import akka.actor.Terminated
+import akka.actor.TypedActor.PostStop
 
 /**
  * Entry point for AMQP messages to enter the Akka world.
@@ -18,19 +21,31 @@ import akka.actor.Terminated
  * Monitors the actor which it sends messages to. If the monitored actor dies,
  * all unacknowledged messages will be requeued.
  */
-private[driver] class AmqpGuardianActor(channel: Channel, consumerTag: String, configuration: QueueConfiguration) extends Actor {
+private[driver] class AmqpGuardianActor(
+    channel: Channel,
+    configuration: QueueConfiguration,
+    generateId: IdGenerators.IdGenerator = IdGenerators.random) extends Actor with PostStop {
+  
   private val logger = LoggerFactory.getLogger(getClass)
-  private var unacknowledged = Set[Long]()
-  private var unanswered = Map[Long, MessageProperties]()
+  
+  private val consumerTag = generateId()
   private val autoAcknowledge = configuration.autoAcknowledge
   
+  private var unacknowledged = Set[Long]()
+  private var unanswered = Map[Long, MessageProperties]()
+  
+  channel.queueDeclare(configuration.queue, configuration.durable, configuration.exclusive, configuration.autoDelete, null)
+  logger.debug("Declared request queue: {}", configuration.queue)
+  
+  channel.basicQos(1)
+
   def receive = {
     case Bind(actor) =>
       context.become(bound(actor))
       context.watch(actor)
       
       val callback = new AkkaMessageConsumer(channel, self)
-      channel.basicConsume(configuration.queue, configuration.autoAcknowledge, consumerTag, callback)
+      channel.basicConsume(configuration.queue, autoAcknowledge, consumerTag, callback)
   }
 
   private def bound(actor: ActorRef): Receive = {
@@ -82,16 +97,26 @@ private[driver] class AmqpGuardianActor(channel: Channel, consumerTag: String, c
     }
 
     /**
-     * Handles a terminate message from the watched actor by requeueing all unacknowledged messages.
+     * Handles a terminate message from the watched actor by shutting down the
+     * message consumer and stopping the guardian actor after its mailbox is
+     * empty.
      */
     case _: Terminated => {
-      unacknowledged foreach (channel.basicNack(_, false, true))
-      unanswered = unanswered.empty
       channel.basicCancel(consumerTag)
+      
+      self ! PoisonPill
     }
-
-    case x => {
-      logger.error("Got unknown message {}", x)
+    
+    case unsupportedMessage => {
+      logger.error("Received unsupported message {}", unsupportedMessage)
     }
+  }
+  
+  /**
+   * Requeues all unacknowledged messages and empties all unanswered messages.
+   */
+  override def postStop: Unit = {
+    unacknowledged foreach (channel.basicNack(_, false, true))
+    unanswered = unanswered.empty
   }
 }

@@ -36,6 +36,8 @@ private[blackbox] class BlackBoxAmqpProviderConsumer(system: ActorSystem) extend
     case Some(_) =>
       throw new IllegalStateException("An actor was already bound to AmqpDriver")
   }
+  
+  def provider(): ActorRef = system.actorOf(Props(classOf[BlackBoxHandlerActor], completed))
 
   /**
    * Unbinds the actor from the black box provider, and de-activates it.

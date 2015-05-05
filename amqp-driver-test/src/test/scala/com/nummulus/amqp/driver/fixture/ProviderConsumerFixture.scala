@@ -1,16 +1,10 @@
 package com.nummulus.amqp.driver.fixture
 
-import com.nummulus.amqp.driver.AmqpDriver
-import com.nummulus.amqp.driver.DefaultDriver
 import com.nummulus.amqp.driver.ConnectionFactory
-import com.typesafe.config.ConfigFactory
+import com.nummulus.amqp.driver.DefaultDriver
 import com.rabbitmq.client.{ ConnectionFactory => RabbitConnectionFactory }
-import com.nummulus.amqp.driver.configuration.QueueConfiguration
-import com.nummulus.amqp.driver.DefaultProvider
-import com.typesafe.config.Config
-import com.typesafe.config.impl.SimpleConfigObject
 import com.typesafe.config._
-import akka.actor.ActorSystem
+import com.typesafe.config.ConfigFactory
 
 class ProviderConsumerFixture(fileName: String) {
   val config = ConfigFactory.load(fileName);
