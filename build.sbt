@@ -5,6 +5,9 @@ lazy val commonSettings = Seq(
   scalaVersion := "2.11.6",
   scalacOptions ++= Seq("-deprecation", "-optimise", "-explaintypes"),
 
+  organizationName := "Nummulus",
+  organizationHomepage := Some(url("http://nummulus.com/")),
+
   pomExtra := pom
 )
 
