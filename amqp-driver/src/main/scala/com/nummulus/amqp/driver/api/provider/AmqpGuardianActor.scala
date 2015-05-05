@@ -26,14 +26,14 @@ private[driver] class AmqpGuardianActor(channel: Channel, consumerTag: String, c
   
   def receive = {
     case Bind(actor) =>
-      context.become(active(actor))
+      context.become(bound(actor))
       context.watch(actor)
       
       val callback = new AkkaMessageConsumer(channel, self)
       channel.basicConsume(configuration.queue, configuration.autoAcknowledge, consumerTag, callback)
   }
 
-  private def active(actor: ActorRef): Receive = {
+  private def bound(actor: ActorRef): Receive = {
     /**
      * Handles an incoming message from the queue.
      */
