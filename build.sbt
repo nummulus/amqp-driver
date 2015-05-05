@@ -3,8 +3,9 @@ lazy val commonSettings = Seq(
   version := "0.2.0-SNAPSHOT",
 
   scalaVersion := "2.11.6",
+  scalacOptions ++= Seq("-deprecation", "-optimise", "-explaintypes"),
 
-  scalacOptions ++= Seq("-deprecation", "-optimise", "-explaintypes")
+  pomExtra := pom
 )
 
 /**
@@ -65,3 +66,30 @@ lazy val testDependencies = Seq(
   "org.mockito" % "mockito-all" % "1.9.5" % Test,
   "com.typesafe.akka" %% "akka-testkit" % akkaVersion % Test
 )
+
+/**
+ * Publishing
+ */
+publishTo := {
+  val nexus = "https://oss.sonatype.org/"
+  if (isSnapshot.value)
+    Some("snapshots" at nexus + "content/repositories/snapshots")
+  else
+    Some("releases"  at nexus + "service/local/staging/deploy/maven2")
+}
+
+credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
+
+lazy val pom =
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <scm>
+    <connection>scm:git:git@github.com:nummulus/amqp-driver.git</connection>
+    <developerConnection>scm:git:git@github.com:nummulus/amqp-driver.git</developerConnection>
+    <url>git@github.com:nummulus/amqp-driver.git</url>
+  </scm>
