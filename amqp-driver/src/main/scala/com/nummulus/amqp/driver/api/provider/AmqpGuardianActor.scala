@@ -34,7 +34,7 @@ private[driver] class AmqpGuardianActor(
   private var unacknowledged = Set[Long]()
   private var unanswered = Map[Long, MessageProperties]()
   
-  private val requestQueue = channel.queueDeclare(configuration.queue, configuration.durable, configuration.exclusive, configuration.autoDelete, null)
+  channel.queueDeclare(configuration.queue, configuration.durable, configuration.exclusive, configuration.autoDelete, null)
   logger.debug("Declared request queue: {}", configuration.queue)
   
   channel.basicQos(1)
