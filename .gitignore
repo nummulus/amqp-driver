@@ -5,6 +5,7 @@
 .scala_dependencies
 .settings/
 target/
+bin/
 .cache
 
 # IntelliJ files
