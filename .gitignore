@@ -5,7 +5,11 @@
 .scala_dependencies
 .settings/
 target/
+bin/
 .cache
+
+# IntelliJ files
+.idea/
 
 # Scala IDE files
 .worksheet
