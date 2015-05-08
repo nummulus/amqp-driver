@@ -115,7 +115,7 @@ private[driver] class AmqpGuardianActor(
   /**
    * Requeues all unacknowledged messages and empties all unanswered messages.
    */
-  override def postStop: Unit = {
+  override def postStop(): Unit = {
     unacknowledged foreach (channel.basicNack(_, false, true))
     unanswered = unanswered.empty
   }

@@ -24,7 +24,7 @@ import akka.testkit.TestProbe
 class ProviderConsumerTest extends TestKit(ActorSystem("test-system")) with ImplicitSender with FlatSpecLike with Matchers
   with ScalaFutures with TableDrivenPropertyChecks with BeforeAndAfterAll {
   
-  override def afterAll {
+  override def afterAll() {
     TestKit.shutdownActorSystem(system)
   }
 

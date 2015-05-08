@@ -211,7 +211,7 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system"))
   
   
   
-  override def afterAll: Unit = {
+  override def afterAll(): Unit = {
     TestKit.shutdownActorSystem(system)
   }
   
