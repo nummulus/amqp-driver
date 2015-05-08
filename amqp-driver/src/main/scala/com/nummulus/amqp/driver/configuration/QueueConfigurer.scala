@@ -49,7 +49,7 @@ private[driver] trait QueueConfigurer {
           operationConfig.getBoolean("autoDelete"),
           operationConfig.getBoolean("autoAcknowledge"))
     } catch {
-      case e: ConfigException => throw new ConfigurationException(e.getMessage(), e)
+      case e: ConfigException => throw new ConfigurationException(e.getMessage, e)
     }
   }
 
