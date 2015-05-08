@@ -1,15 +1,12 @@
 package com.nummulus.amqp.driver
 
-import org.junit.runner.RunWith
 import org.scalatest._
-import org.scalatest.junit._
 import org.scalatest.mock.MockitoSugar
 import org.mockito.Mockito._
 import com.typesafe.config.ConfigFactory
 import com.typesafe.config.ConfigException
 import com.nummulus.amqp.driver.configuration.ConfigurationException
 
-@RunWith(classOf[JUnitRunner])
 class DefaultDriverTest extends FlatSpec with Matchers with MockitoSugar with OneInstancePerTest {
   behavior of "DefaultDriver"
   

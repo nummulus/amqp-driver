@@ -1,6 +1,5 @@
 package com.nummulus.amqp.driver.blackbox
 
-import org.junit.runner.RunWith
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.scalatest.Args
@@ -14,7 +13,6 @@ import org.scalatest.mock.MockitoSugar
 
 import akka.actor.ActorSystem
 
-@RunWith(classOf[org.scalatest.junit.JUnitRunner])
 class BlackBoxAmqpTestKitTest extends FlatSpec with Matchers with MockitoSugar with OneInstancePerTest {
 
   val actorSystem = mock[ActorSystem]

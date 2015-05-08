@@ -1,11 +1,9 @@
 package com.nummulus.amqp.driver.test
 
-import org.junit.runner.RunWith
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.FlatSpecLike
 import org.scalatest.Matchers
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.junit._
 import org.scalatest.prop.TableDrivenPropertyChecks
 
 import com.nummulus.amqp.driver.api.consumer.AmqpConsumerRequest
@@ -23,8 +21,7 @@ import akka.testkit.ImplicitSender
 import akka.testkit.TestKit
 import akka.testkit.TestProbe
 
-@RunWith(classOf[JUnitRunner])
-class ProviderConsumerTest extends TestKit(ActorSystem("test-system")) with ImplicitSender with FlatSpecLike with Matchers 
+class ProviderConsumerTest extends TestKit(ActorSystem("test-system")) with ImplicitSender with FlatSpecLike with Matchers
   with ScalaFutures with TableDrivenPropertyChecks with BeforeAndAfterAll {
   
   override def afterAll {

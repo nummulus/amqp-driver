@@ -1,12 +1,9 @@
 package com.nummulus.amqp.driver.configuration
 
-import org.junit.runner.RunWith
 import org.scalatest.FlatSpec
 import org.scalatest.Matchers
 import com.typesafe.config.ConfigFactory
-import org.scalatest.junit.JUnitRunner
 
-@RunWith(classOf[JUnitRunner])
 class QueueConfigurerTest extends FlatSpec with Matchers {
   val configValue = """amqp {
     host = localhost

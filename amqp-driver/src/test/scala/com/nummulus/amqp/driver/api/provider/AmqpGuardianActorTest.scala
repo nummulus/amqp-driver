@@ -1,6 +1,5 @@
 package com.nummulus.amqp.driver.api.provider
 
-import org.junit.runner.RunWith
 import org.mockito.Matchers.{eq => matchEq}
 import org.mockito.Matchers._
 import org.mockito.Mockito._
@@ -24,7 +23,6 @@ import akka.testkit.TestActorRef
 import akka.testkit.TestKit
 import akka.testkit.TestProbe
 
-@RunWith(classOf[org.scalatest.junit.JUnitRunner])
 class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system"))
     with FlatSpecLike
     with Matchers

@@ -1,6 +1,5 @@
 package com.nummulus.amqp.driver.blackbox
 
-import org.junit.runner.RunWith
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.FlatSpecLike
 import org.scalatest.Matchers
@@ -15,7 +14,6 @@ import akka.actor.ActorSystem
 import akka.testkit.TestKit
 import akka.testkit.TestProbe
 
-@RunWith(classOf[org.scalatest.junit.JUnitRunner])
 class BlackBoxAmqpProviderConsumerTest extends TestKit(ActorSystem("test-system"))
     with FlatSpecLike with Matchers with OneInstancePerTest with BeforeAndAfterAll with ScalaFutures {
   
