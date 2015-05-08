@@ -11,7 +11,7 @@ private[driver] trait QueueConfigurer {
   /**
    * Returns the queue configuration of a consumer's service operation.
    * 
-   * @throws QueueConfiguration if the queue has missing keys in the configuration file
+   * @throws ConfigurationException if the queue has missing keys in the configuration file
    */
   def getConsumerQueueConfiguration(rootConfig: Config, service: String, operation: String): QueueConfiguration =
     getQueueConfiguration(rootConfig, operation, s"uses.$service")
@@ -19,7 +19,7 @@ private[driver] trait QueueConfigurer {
   /**
    * Returns the queue configuration of a provider's service operation.
    * 
-   * @throws QueueConfiguration if the queue has missing keys in the configuration file
+   * @throws ConfigurationException if the queue has missing keys in the configuration file
    */
   def getProvideQueuerConfiguration(rootConfig: Config, operation: String): QueueConfiguration =
     getQueueConfiguration(rootConfig, operation, "defines")
@@ -30,7 +30,7 @@ private[driver] trait QueueConfigurer {
    * 
    * @param operation name of the operation
    * @param queueRootConfig root of the queues configuration
-   * @throws QueueConfiguration if the queue has missing keys in the configuration file
+   * @throws ConfigurationException if the queue has missing keys in the configuration file
    */
   private def getQueueConfiguration(rootConfig: Config, operation: String, pathToRoot: => String): QueueConfiguration = {
     try {
