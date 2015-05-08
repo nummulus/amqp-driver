@@ -61,7 +61,7 @@ class QueueConfigurerTest extends FlatSpec with Matchers {
     }
   }"""
 
-  val systemConfig = ConfigFactory.parseString(configValue);
+  val systemConfig = ConfigFactory.parseString(configValue)
   val rootConfig = systemConfig.getConfig("amqp")
   val queueConfigurer = new Object () with QueueConfigurer
 
