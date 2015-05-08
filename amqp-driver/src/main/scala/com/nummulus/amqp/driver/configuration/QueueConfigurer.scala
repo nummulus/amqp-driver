@@ -7,7 +7,6 @@ import com.typesafe.config.ConfigException
  * Provides convenience for configuring queues for providers and consumerss
  */
 private[driver] trait QueueConfigurer {
-
   /**
    * Returns the queue configuration of a consumer's service operation.
    * 
@@ -27,9 +26,10 @@ private[driver] trait QueueConfigurer {
   /**
    * Returns the configuration of the request queue for the specified service
    * operation.
-   * 
+   *
+   * @param rootConfig root of the driver's configuration
    * @param operation name of the operation
-   * @param queueRootConfig root of the queues configuration
+   * @param pathToRoot path to the root of the queue's configuration
    * @throws ConfigurationException if the queue has missing keys in the configuration file
    */
   private def getQueueConfiguration(rootConfig: Config, operation: String, pathToRoot: => String): QueueConfiguration = {
