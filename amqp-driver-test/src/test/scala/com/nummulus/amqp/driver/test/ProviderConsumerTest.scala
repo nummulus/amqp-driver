@@ -28,11 +28,11 @@ class ProviderConsumerTest extends TestKit(ActorSystem("test-system")) with Impl
     TestKit.shutdownActorSystem(system)
   }
 
-  val propertyFiles = Table(("file"),
-    ("ProviderConsumer_1.conf"),
-    ("ProviderConsumer_2.conf"),
-    ("ProviderConsumer_3.conf"),
-    ("ProviderConsumer_4.conf")
+  val propertyFiles = Table("file",
+    "ProviderConsumer_1.conf",
+    "ProviderConsumer_2.conf",
+    "ProviderConsumer_3.conf",
+    "ProviderConsumer_4.conf"
   )
 
   forAll(propertyFiles) { (propertyFile : String) =>
