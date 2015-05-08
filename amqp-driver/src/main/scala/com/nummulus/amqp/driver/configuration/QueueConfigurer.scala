@@ -34,13 +34,13 @@ private[driver] trait QueueConfigurer {
    */
   private def getQueueConfiguration(rootConfig: Config, operation: String, pathToRoot: => String): QueueConfiguration = {
     try {
-      val queueRootConfig = rootConfig.getConfig(pathToRoot) //defines
-      val operationConfig = queueRootConfig.getConfig(operation) //operation_one
+      val queueRootConfig = rootConfig.getConfig(pathToRoot)
+      val operationConfig = queueRootConfig.getConfig(operation)
       
-      val serviceName = queueRootConfig.getString("serviceName") //service.test
-      val operationName = operationConfig.getString("queue") //Test
+      val serviceName = queueRootConfig.getString("serviceName")
+      val operationName = operationConfig.getString("queue")
       
-      val queue = s"$serviceName.$operationName" //service.test.Test
+      val queue = s"$serviceName.$operationName"
       
       QueueConfiguration(
           queue,
