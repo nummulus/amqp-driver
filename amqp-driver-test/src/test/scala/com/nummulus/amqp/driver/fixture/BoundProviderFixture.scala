@@ -13,7 +13,6 @@ import com.nummulus.amqp.driver.configuration.QueueConfiguration
 
 import akka.actor.ActorSystem
 import akka.testkit.TestProbe
-import akka.actor.ActorRef
 import akka.actor.Props
 
 class BoundProviderFixture(autoAcknowledge: Boolean) extends MockitoSugar {

@@ -1,7 +1,6 @@
 package com.nummulus.amqp.driver.blackbox
 
 import com.nummulus.amqp.driver.AmqpDriver
-import com.nummulus.amqp.driver.AmqpProvider
 
 import akka.actor.ActorRef
 import akka.actor.ActorSystem

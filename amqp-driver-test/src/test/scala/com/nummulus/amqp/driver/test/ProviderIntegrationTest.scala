@@ -1,6 +1,5 @@
 package com.nummulus.amqp.driver.test
 
-import org.mockito.Mockito._
 import org.scalatest._
 
 import com.nummulus.amqp.driver.api.provider.AmqpProviderRequest

@@ -3,7 +3,6 @@ package com.nummulus.amqp.driver.fixture
 import com.nummulus.amqp.driver.ConnectionFactory
 import com.nummulus.amqp.driver.DefaultDriver
 import com.rabbitmq.client.{ ConnectionFactory => RabbitConnectionFactory }
-import com.typesafe.config._
 import com.typesafe.config.ConfigFactory
 
 class ProviderConsumerFixture(fileName: String) {
