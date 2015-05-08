@@ -20,7 +20,7 @@ class AkkaConsumerFixture(implicit system: ActorSystem) extends MockitoSugar {
   val someCorrelationId = "4"
   val correlationIdGenerator = () => someCorrelationId
   
-  when (channel.queueDeclare) thenReturn declareOk
+  when (channel.queueDeclare()) thenReturn declareOk
   when (channel.queueDeclare("requestQueue", true, false, false, null)) thenReturn declareOk
   when (declareOk.getQueue) thenReturn "generated-queue-name"
   

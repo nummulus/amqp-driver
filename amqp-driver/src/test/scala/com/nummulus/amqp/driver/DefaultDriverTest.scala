@@ -11,10 +11,10 @@ class DefaultDriverTest extends FlatSpec with Matchers with MockitoSugar with On
   behavior of "DefaultDriver"
   
   it should "connect to the broker after creating a consumer actor" in {
-    verify (factory, never).newConnection
+    verify (factory, never).newConnection()
     
     driver.newConsumer("TestService", "testOperation")
-    verify (factory, times(1)).newConnection
+    verify (factory, times(1)).newConnection()
   }
   
   it should "set the broker host when creating a consumer actor" in {
@@ -24,7 +24,7 @@ class DefaultDriverTest extends FlatSpec with Matchers with MockitoSugar with On
   
   it should "create a channel when creating a consumer actor" in {
     driver.newConsumer("TestService", "testOperation")
-    verify (connection).createChannel
+    verify (connection).createChannel()
   }
   
   it should "throw an exception if the service doesn't exist when creating a consumer actor" in {
@@ -45,10 +45,10 @@ class DefaultDriverTest extends FlatSpec with Matchers with MockitoSugar with On
   
   
   it should "connect to the broker after creating a provider" in {
-    verify (factory, never).newConnection
+    verify (factory, never).newConnection()
     
     driver.newProvider("parseFile")
-    verify (factory, times(1)).newConnection
+    verify (factory, times(1)).newConnection()
   }
   
   it should "set the broker host when creating a provider" in {
@@ -58,7 +58,7 @@ class DefaultDriverTest extends FlatSpec with Matchers with MockitoSugar with On
   
   it should "create a channel when creating a provider" in {
     driver.newProvider("parseFile")
-    verify (connection).createChannel
+    verify (connection).createChannel()
   }
   
   it should "throw an exception if the operation doesn't exist when creating a provider" in {
@@ -75,9 +75,9 @@ class DefaultDriverTest extends FlatSpec with Matchers with MockitoSugar with On
   val channel = mock[Channel]
   val declareOk = mock[QueueDeclareOk]
   
-  when (factory.newConnection) thenReturn connection
-  when (connection.createChannel) thenReturn channel
-  when (channel.queueDeclare) thenReturn declareOk
+  when (factory.newConnection()) thenReturn connection
+  when (connection.createChannel()) thenReturn channel
+  when (channel.queueDeclare()) thenReturn declareOk
   when (channel.queueDeclare("TestService.TestOperation", true, false, false, null)) thenReturn declareOk
   when (channel.queueDeclare("Importeur.ParseFile", true, false, false, null)) thenReturn declareOk
   when (declareOk.getQueue) thenReturn "generated-queue-name"

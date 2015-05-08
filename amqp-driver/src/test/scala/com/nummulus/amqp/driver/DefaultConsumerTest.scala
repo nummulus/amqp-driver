@@ -23,7 +23,7 @@ class DefaultConsumerTest extends TestKit(ActorSystem("test-system"))
   behavior of "DefaultAkkaConsumer"
   
   it should "declare a response queue at construction time" in new AkkaConsumerFixture {
-    verify (channel).queueDeclare
+    verify (channel).queueDeclare()
   }
   
   it should "declare a request queue at construction time" in new AkkaConsumerFixture {
