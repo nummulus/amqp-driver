@@ -85,7 +85,7 @@ private[driver] class AmqpGuardianActor(
       if (!autoAcknowledge) {
         if (unacknowledged contains deliveryTag) {
           unacknowledged -= deliveryTag
-          channel.basicAck(deliveryTag, false)
+          channel.basicAck(deliveryTag, multiple = false)
         }
         else {
           logger.warn("Message with deliveryTag {} was already acknowledged", deliveryTag)
@@ -116,7 +116,7 @@ private[driver] class AmqpGuardianActor(
    * Requeues all unacknowledged messages and empties all unanswered messages.
    */
   override def postStop(): Unit = {
-    unacknowledged foreach (channel.basicNack(_, false, true))
+    unacknowledged foreach (channel.basicNack(_, multiple = false, requeue = true))
     unanswered = unanswered.empty
   }
 }

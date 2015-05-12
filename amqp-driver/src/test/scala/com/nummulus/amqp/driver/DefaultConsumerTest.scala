@@ -27,7 +27,7 @@ class DefaultConsumerTest extends TestKit(ActorSystem("test-system"))
   }
   
   it should "declare a request queue at construction time" in new AkkaConsumerFixture {
-    verify (channel).queueDeclare("requestQueue", true, false, false, null)
+    verify (channel).queueDeclare("requestQueue", durable = true, exclusive = false, autoDelete = false, null)
   }
   
   it should "tie a consumer to the response queue at construction time" in new AkkaConsumerFixture {

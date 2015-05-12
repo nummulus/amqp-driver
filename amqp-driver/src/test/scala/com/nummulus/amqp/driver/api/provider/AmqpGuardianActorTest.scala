@@ -49,19 +49,19 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system"))
   behavior of "AmqpGuardianActor"
   
   it should "declare a request queue at construction time" in {
-    val guardian = createGuardian(true)
+    val guardian = createGuardian(autoAcknowledge = true)
     
-    verify (channel).queueDeclare(someReplyTo, false, false, true, null)
+    verify (channel).queueDeclare(someReplyTo, durable = false, exclusive = false, autoDelete = true, null)
   }
   
   it should "set the QOS to one" in {
-    val guardian = createGuardian(true)
+    val guardian = createGuardian(autoAcknowledge = true)
     
     verify (channel).basicQos(1)
   }
   
   it should "start consuming messages from the queue after receiving Bind" in {
-    val guardian = createGuardian(true)
+    val guardian = createGuardian(autoAcknowledge = true)
     
     guardian ! Bind(testActor)
     
@@ -73,7 +73,7 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system"))
   }
   
   it should "cancel the consumer if the bound actor terminates" in {
-    val configuration = QueueConfiguration(someReplyTo, false, false, true, false)
+    val configuration = QueueConfiguration(someReplyTo, durable = false, exclusive = false, autoDelete = true, autoAcknowledge = false)
     val guardian = TestActorRef(new AmqpGuardianActor(channel, configuration, () => someConsumerTag))
   
     val probe = TestProbe().ref
@@ -88,7 +88,7 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system"))
   
   behavior of "AmqpGuardianActor with AutoAcknowledge"
 
-  val autoAckGuardian = createInitializedGuardian(true)
+  val autoAckGuardian = createInitializedGuardian(autoAcknowledge = true)
   
   it should "pass on a message that appears on the channel" in {
     autoAckGuardian ! someMessage
@@ -140,7 +140,7 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system"))
   
   behavior of "AmqpGuardianActor without AutoAcknowledge"
 
-  val noAckGuardian = createInitializedGuardian(false)
+  val noAckGuardian = createInitializedGuardian(autoAcknowledge = false)
   
   it should "pass on a message that appears on the channel" in {
     noAckGuardian ! someMessage
@@ -178,7 +178,7 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system"))
     noAckGuardian ! someMessage
     testActor ! PoisonPill
     
-    verify (channel, times(1)).basicNack(someDeliveryTag, false, true)
+    verify (channel, times(1)).basicNack(someDeliveryTag, multiple = false, requeue = true)
   }
   
   it should "publish a response to the channel" in {
@@ -216,13 +216,13 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system"))
   }
   
   private def verifyAcknowledgeNever(deliveryTag: Long): Unit = {
-    verify (channel, never()).basicAck(deliveryTag, true)
-    verify (channel, never()).basicAck(deliveryTag, false)
+    verify (channel, never()).basicAck(deliveryTag, multiple = true)
+    verify (channel, never()).basicAck(deliveryTag, multiple = false)
   }
   
   private def verifyAcknowledgeOnce(deliveryTag: Long): Unit = {
-    verify (channel, times(1)).basicAck(deliveryTag, false)
-    verify (channel, never()).basicAck(deliveryTag, true)
+    verify (channel, times(1)).basicAck(deliveryTag, multiple = false)
+    verify (channel, never()).basicAck(deliveryTag, multiple = true)
   }
   
   private def verifyPublishNothing(): Unit = {
@@ -234,7 +234,7 @@ class AmqpGuardianActorTest extends TestKit(ActorSystem("test-system"))
   }
   
   private def createGuardian(autoAcknowledge: Boolean): ActorRef = {
-    val configuration = QueueConfiguration(someReplyTo, false, false, true, autoAcknowledge)
+    val configuration = QueueConfiguration(someReplyTo, durable = false, exclusive = false, autoDelete = true, autoAcknowledge = autoAcknowledge)
     TestActorRef(new AmqpGuardianActor(channel, configuration, () => "some-unique-id-string"))
   }
   

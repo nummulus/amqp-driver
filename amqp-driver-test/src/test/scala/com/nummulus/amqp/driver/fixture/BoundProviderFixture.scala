@@ -20,9 +20,9 @@ class BoundProviderFixture(autoAcknowledge: Boolean) extends MockitoSugar {
   val declareOk = mock[QueueDeclareOk]
   
   when (channel.queueDeclare()) thenReturn declareOk
-  when (channel.queueDeclare("requestQueue", true, false, false, null)) thenReturn declareOk
+  when (channel.queueDeclare("requestQueue", durable = true, exclusive = false, autoDelete = false, null)) thenReturn declareOk
   
-  val queueConfiguration = QueueConfiguration("requestQueue", true, false, false, autoAcknowledge)
+  val queueConfiguration = QueueConfiguration("requestQueue", durable = true, exclusive = false, autoDelete = false, autoAcknowledge = autoAcknowledge)
   
   
   implicit val system = ActorSystem("Test")
