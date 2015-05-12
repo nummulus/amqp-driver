@@ -1,10 +1,8 @@
 package com.nummulus.amqp.driver.akka
 
-import org.junit.runner.RunWith
 import org.scalatest.FlatSpecLike
 import org.scalatest.Matchers
 import org.scalatest.OneInstancePerTest
-import org.scalatest.junit._
 import org.scalatest.mock.MockitoSugar
 
 import com.nummulus.amqp.driver.MessageProperties
@@ -15,7 +13,6 @@ import com.rabbitmq.client.Envelope
 import akka.actor.ActorSystem
 import akka.testkit.TestKit
 
-@RunWith(classOf[JUnitRunner])
 class AkkaRabbitConsumerTest extends TestKit(ActorSystem("test-system")) with FlatSpecLike with Matchers with MockitoSugar with OneInstancePerTest {
   val SomeDeliveryTag = 1337
   val SomeMessageBody = "some message body"

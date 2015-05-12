@@ -64,7 +64,6 @@ lazy val blackboxDependencies = Seq(
 ) ++ testDependencies
 
 lazy val testDependencies = Seq(
-  "junit" % "junit" % "4.11" % Test,
   "org.scalatest" %% "scalatest" % scalatestVersion % Test,
   "org.mockito" % "mockito-all" % "1.9.5" % Test,
   "com.typesafe.akka" %% "akka-testkit" % akkaVersion % Test
