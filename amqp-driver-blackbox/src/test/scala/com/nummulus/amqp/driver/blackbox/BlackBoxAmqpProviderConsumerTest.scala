@@ -136,7 +136,7 @@ class BlackBoxAmqpProviderConsumerTest extends TestKit(ActorSystem("test-system"
     thrown.getMessage should be ("No actor bound to AmqpDriver")
   }
 
-  override def afterAll: Unit = {
+  override def afterAll(): Unit = {
     TestKit.shutdownActorSystem(system)
   }
 }

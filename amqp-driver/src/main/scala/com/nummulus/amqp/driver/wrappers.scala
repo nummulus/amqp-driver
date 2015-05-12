@@ -91,7 +91,7 @@ class QueueDeclareOk(declareOk: DeclareOk) {
 
 class ShutdownLogger extends ShutdownListener {
   private val logger = LoggerFactory.getLogger(getClass)
-  def shutdownCompleted(cause: ShutdownSignalException): Unit = logger.info("Closed channel, because: {}", cause.getReason())
+  def shutdownCompleted(cause: ShutdownSignalException): Unit = logger.info("Closed channel, because: {}", cause.getReason)
 }
 
 object ShutdownLogger {
@@ -115,18 +115,18 @@ case class MessageProperties(
 object MessageProperties {
   def apply(props: AMQP.BasicProperties): MessageProperties =
     MessageProperties(
-        contentType = props.getContentType(),
-        contentEncoding = props.getContentEncoding(),
+        contentType = props.getContentType,
+        contentEncoding = props.getContentEncoding,
         headers = null,
         deliveryMode = integer2int(props.getDeliveryMode, 1),
-        priority = integer2int(props.getPriority(), 0),
-        correlationId = props.getCorrelationId(),
-        replyTo = props.getReplyTo(),
-        expiration = props.getExpiration(),
-        messageId = props.getMessageId(),
-        userId = props.getUserId(),
-        appId = props.getAppId(),
-        clusterId = props.getClusterId())
+        priority = integer2int(props.getPriority, 0),
+        correlationId = props.getCorrelationId,
+        replyTo = props.getReplyTo,
+        expiration = props.getExpiration,
+        messageId = props.getMessageId,
+        userId = props.getUserId,
+        appId = props.getAppId,
+        clusterId = props.getClusterId)
   
   /**
    * Returns the value if it's not null, returns the default value otherwise.

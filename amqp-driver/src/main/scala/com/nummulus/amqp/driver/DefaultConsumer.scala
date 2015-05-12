@@ -19,7 +19,7 @@ class DefaultConsumer(
   
   private val logger = LoggerFactory.getLogger(getClass)
   
-  private val responseQueue = channel.queueDeclare.getQueue
+  private val responseQueue = channel.queueDeclare().getQueue
   logger.debug("Declared response queue: {}", responseQueue)
   
   private val requestQueue = channel.queueDeclare(configuration.queue, configuration.durable, configuration.exclusive, configuration.autoDelete, null)

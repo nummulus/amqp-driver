@@ -7,11 +7,10 @@ import com.typesafe.config.ConfigException
  * Provides convenience for configuring queues for providers and consumerss
  */
 private[driver] trait QueueConfigurer {
-
   /**
    * Returns the queue configuration of a consumer's service operation.
    * 
-   * @throws QueueConfiguration if the queue has missing keys in the configuration file
+   * @throws ConfigurationException if the queue has missing keys in the configuration file
    */
   def getConsumerQueueConfiguration(rootConfig: Config, service: String, operation: String): QueueConfiguration =
     getQueueConfiguration(rootConfig, operation, s"uses.$service")
@@ -19,7 +18,7 @@ private[driver] trait QueueConfigurer {
   /**
    * Returns the queue configuration of a provider's service operation.
    * 
-   * @throws QueueConfiguration if the queue has missing keys in the configuration file
+   * @throws ConfigurationException if the queue has missing keys in the configuration file
    */
   def getProvideQueuerConfiguration(rootConfig: Config, operation: String): QueueConfiguration =
     getQueueConfiguration(rootConfig, operation, "defines")
@@ -27,20 +26,21 @@ private[driver] trait QueueConfigurer {
   /**
    * Returns the configuration of the request queue for the specified service
    * operation.
-   * 
+   *
+   * @param rootConfig root of the driver's configuration
    * @param operation name of the operation
-   * @param queueRootConfig root of the queues configuration
-   * @throws QueueConfiguration if the queue has missing keys in the configuration file
+   * @param pathToRoot path to the root of the queue's configuration
+   * @throws ConfigurationException if the queue has missing keys in the configuration file
    */
   private def getQueueConfiguration(rootConfig: Config, operation: String, pathToRoot: => String): QueueConfiguration = {
     try {
-      val queueRootConfig = rootConfig.getConfig(pathToRoot) //defines
-      val operationConfig = queueRootConfig.getConfig(operation) //operation_one
+      val queueRootConfig = rootConfig.getConfig(pathToRoot)
+      val operationConfig = queueRootConfig.getConfig(operation)
       
-      val serviceName = queueRootConfig.getString("serviceName") //service.test
-      val operationName = operationConfig.getString("queue") //Test
+      val serviceName = queueRootConfig.getString("serviceName")
+      val operationName = operationConfig.getString("queue")
       
-      val queue = s"$serviceName.$operationName" //service.test.Test
+      val queue = s"$serviceName.$operationName"
       
       QueueConfiguration(
           queue,
@@ -49,7 +49,7 @@ private[driver] trait QueueConfigurer {
           operationConfig.getBoolean("autoDelete"),
           operationConfig.getBoolean("autoAcknowledge"))
     } catch {
-      case e: ConfigException => throw new ConfigurationException(e.getMessage(), e)
+      case e: ConfigException => throw new ConfigurationException(e.getMessage, e)
     }
   }
 

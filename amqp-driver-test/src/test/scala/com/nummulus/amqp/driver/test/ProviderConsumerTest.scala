@@ -24,15 +24,15 @@ import akka.testkit.TestProbe
 class ProviderConsumerTest extends TestKit(ActorSystem("test-system")) with ImplicitSender with FlatSpecLike with Matchers
   with ScalaFutures with TableDrivenPropertyChecks with BeforeAndAfterAll {
   
-  override def afterAll {
+  override def afterAll() {
     TestKit.shutdownActorSystem(system)
   }
 
-  val propertyFiles = Table(("file"),
-    ("ProviderConsumer_1.conf"),
-    ("ProviderConsumer_2.conf"),
-    ("ProviderConsumer_3.conf"),
-    ("ProviderConsumer_4.conf")
+  val propertyFiles = Table("file",
+    "ProviderConsumer_1.conf",
+    "ProviderConsumer_2.conf",
+    "ProviderConsumer_3.conf",
+    "ProviderConsumer_4.conf"
   )
 
   forAll(propertyFiles) { (propertyFile : String) =>

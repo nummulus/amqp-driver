@@ -1,6 +1,6 @@
 package com.nummulus.amqp.driver.api.consumer
 
-import _root_.akka.actor.ActorRef
+import akka.actor.ActorRef
 
 /**
  * Request for a consumer which will send it to a provider's queue.

@@ -2,7 +2,6 @@ package com.nummulus.amqp.driver.matcher
 
 import org.scalatest.matchers.BeMatcher
 import org.scalatest.matchers.MatchResult
-import org.scalatest.matchers.Matcher
 
 trait TypeMatcher {
   def ofType[T: Manifest] = BeMatcher { left: Any =>
