@@ -18,7 +18,7 @@ import _root_.akka.actor.Actor
 import _root_.akka.actor.ActorRef
 import _root_.akka.actor.Scheduler
 
-class DefaultConsumer(
+private[driver] class DefaultConsumer(
     channel: Channel,
     configuration: QueueConfiguration,
     timeOut: Duration,
