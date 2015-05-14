@@ -1,18 +1,25 @@
 package com.nummulus.amqp.driver
 
-import org.mockito.{Matchers => MockitoMatchers}
+import scala.concurrent.ExecutionContext
+import scala.concurrent.duration._
+
 import org.mockito.Mockito._
+import org.mockito.{Matchers => MockitoMatchers}
 import org.scalatest.FlatSpecLike
 import org.scalatest.Matchers
 
 import com.nummulus.amqp.driver.akka.AkkaMessageConsumer
 import com.nummulus.amqp.driver.akka.AmqpQueueMessageWithProperties
-import com.nummulus.amqp.driver.api.consumer.AmqpConsumerResponse
 import com.nummulus.amqp.driver.api.consumer.AmqpConsumerRequest
+import com.nummulus.amqp.driver.api.consumer.AmqpConsumerRequestTimedOut
+import com.nummulus.amqp.driver.api.consumer.AmqpConsumerResponse
+import com.nummulus.amqp.driver.api.consumer.RequestTimedOut
 import com.nummulus.amqp.driver.fixture.AkkaConsumerFixture
 
+import _root_.akka.actor.ActorRef
 import _root_.akka.actor.ActorSystem
 import _root_.akka.testkit.ImplicitSender
+import _root_.akka.testkit.TestActorRef
 import _root_.akka.testkit.TestKit
 
 class DefaultConsumerTest extends TestKit(ActorSystem("test-system"))
@@ -70,7 +77,58 @@ class DefaultConsumerTest extends TestKit(ActorSystem("test-system"))
         replyTo = "nowhere"),
       1)
     
-    import scala.concurrent.duration._
     expectNoMsg(100.millis) // timeout is enough since consumer is synchronous
+  }
+
+  it should "schedule a time-out message if a time-out is specified" in new AkkaConsumerFixture {
+    private val consumerWithTimeOut: TestActorRef[DefaultConsumer] = consumerWithTimeOut(100.millis)
+
+    consumerWithTimeOut ! AmqpConsumerRequest("request cheese", Some(self))
+
+    verify (scheduler).scheduleOnce(
+      MockitoMatchers.eq(100.millis),
+      MockitoMatchers.eq(consumerWithTimeOut),
+      MockitoMatchers.eq(RequestTimedOut(someCorrelationId))
+    )(
+      MockitoMatchers.any(classOf[ExecutionContext]),
+      MockitoMatchers.any(classOf[ActorRef])
+    )
+  }
+
+  it should "not schedule a time-out message if the time-out is infinite" in new AkkaConsumerFixture {
+    private val consumerWithTimeOut: TestActorRef[DefaultConsumer] = consumerWithTimeOut(100.millis)
+
+    consumerWithTimeOut ! AmqpConsumerRequest("request cheese")
+
+    verifyZeroInteractions (scheduler)
+  }
+
+  it should "return an AmqpConsumerRequestTimedOut if a time-out is received before the response" in new AkkaConsumerFixture {
+    private val consumerWithTimeOut: TestActorRef[DefaultConsumer] = consumerWithTimeOut(100.millis)
+
+    consumerWithTimeOut ! AmqpConsumerRequest("request cheese", Some(self))
+
+    consumerWithTimeOut ! RequestTimedOut(someCorrelationId)
+
+    expectMsg(AmqpConsumerRequestTimedOut)
+  }
+
+  it should "ignore the time-out if the response is received before the time-out" in new AkkaConsumerFixture {
+    private val consumerWithTimeOut: TestActorRef[DefaultConsumer] = consumerWithTimeOut(100.millis)
+
+    consumerWithTimeOut ! AmqpConsumerRequest("request cheese", Some(self))
+
+    consumerWithTimeOut ! AmqpQueueMessageWithProperties(
+      "Camembert",
+      MessageProperties(
+        correlationId = someCorrelationId,
+        replyTo = "nowhere"),
+      1)
+
+    expectMsg(AmqpConsumerResponse("Camembert"))
+
+    consumerWithTimeOut ! RequestTimedOut(someCorrelationId)
+
+    expectNoMsg(100.millis)
   }
 }

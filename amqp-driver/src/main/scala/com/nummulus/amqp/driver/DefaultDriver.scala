@@ -3,6 +3,7 @@ package com.nummulus.amqp.driver
 import org.slf4j.LoggerFactory
 
 import com.nummulus.amqp.driver.api.provider.AmqpGuardianActor
+import com.nummulus.amqp.driver.configuration.TimeOutConfigurer
 import com.nummulus.amqp.driver.configuration.QueueConfigurer
 import com.typesafe.config.Config
 
@@ -17,7 +18,10 @@ import _root_.akka.actor.Props
  * established if a consumer is created. Every consumer will get a separate
  * channel.
  */
-private[driver] class DefaultDriver(connectionFactory: ConnectionFactory, config: Config) extends AmqpDriver with QueueConfigurer {
+private[driver] class DefaultDriver(connectionFactory: ConnectionFactory, config: Config) extends AmqpDriver
+    with QueueConfigurer
+    with TimeOutConfigurer {
+
   private val logger = LoggerFactory.getLogger(getClass)
   private val rootConfig = config.getConfig("amqp")
   
@@ -36,7 +40,8 @@ private[driver] class DefaultDriver(connectionFactory: ConnectionFactory, config
     val queueConfiguration = getConsumerQueueConfiguration(rootConfig, service, operation)
     
     val channel = connection.createChannel()
-    actorSystem.actorOf(Props(classOf[DefaultConsumer], channel, queueConfiguration, IdGenerators.random))
+    val timeOut = getConsumerTimeOut(rootConfig, service, operation)
+    actorSystem.actorOf(Props(classOf[DefaultConsumer], channel, queueConfiguration, timeOut, IdGenerators.random))
   }
   
   /**
