@@ -8,6 +8,10 @@
 
 * Removed the `AmqpConsumer` in favor of an actor consumer. Send it `AmqpConsumerRequest` messages. If you provide an optional `ActorRef`, it'll send back responses from a service as `AmqpConsumerResponse` messages.
 
+#### New Features
+
+* Added support for time-outs. Time-outs can be defined globally and overwritten per service and / or per operation.
+
 ### Provider
 
 #### Breaking Changes
