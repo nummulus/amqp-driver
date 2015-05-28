@@ -48,10 +48,6 @@ private[driver] class DefaultConsumer(
       
       pending += (properties.correlationId -> sender) 
       
-      logger.debug("Sending message to queue: {}", body)
-      logger.debug("Properties = {}", properties)
-      channel.basicPublish("", configuration.queue, properties, body.getBytes)
-
       if (sender.isDefined && timeOut.isFinite()) {
         import context.dispatcher
 
@@ -61,6 +57,10 @@ private[driver] class DefaultConsumer(
           self,
           RequestTimedOut(properties.correlationId))
       }
+
+      logger.debug("Sending message to queue: {}", body)
+      logger.debug("Properties = {}", properties)
+      channel.basicPublish("", configuration.queue, properties, body.getBytes)
     }
     
     /**

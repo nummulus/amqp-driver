@@ -4,7 +4,7 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
 import org.mockito.Mockito._
-import org.mockito.{Matchers => MockitoMatchers}
+import org.mockito.{Matchers => MockitoMatchers, Mockito}
 import org.scalatest.FlatSpecLike
 import org.scalatest.Matchers
 
@@ -26,38 +26,38 @@ class DefaultConsumerTest extends TestKit(ActorSystem("test-system"))
     with ImplicitSender
     with FlatSpecLike
     with Matchers {
-  
+
   behavior of "DefaultAkkaConsumer"
-  
+
   it should "declare a response queue at construction time" in new AkkaConsumerFixture {
     verify (channel).queueDeclare()
   }
-  
+
   it should "declare a request queue at construction time" in new AkkaConsumerFixture {
     verify (channel).queueDeclare("requestQueue", durable = true, exclusive = false, autoDelete = false, null)
   }
-  
+
   it should "tie a consumer to the response queue at construction time" in new AkkaConsumerFixture {
     verify (channel).basicConsume(
       MockitoMatchers.eq("generated-queue-name"),
       MockitoMatchers.eq(true),
-      MockitoMatchers.eq(someCorrelationId), 
+      MockitoMatchers.eq(someCorrelationId),
       MockitoMatchers.any(classOf[AkkaMessageConsumer]))
   }
-  
+
   it should "publish a message when receiving an AmqpConsumerRequest" in new AkkaConsumerFixture {
     consumer ! AmqpConsumerRequest("publish me", None)
-    
+
     verify (channel).basicPublish(
       MockitoMatchers.eq(""),
       MockitoMatchers.eq("requestQueue"),
       MockitoMatchers.any(classOf[MessageProperties]),
       MockitoMatchers.eq("publish me".getBytes))
   }
-  
+
   it should "return an AmqpConsumerResponse if a sender is specified" in new AkkaConsumerFixture {
     consumer ! AmqpConsumerRequest("request cheese", Some(self))
-    
+
     consumer ! AmqpQueueMessageWithProperties(
       "Camembert",
       MessageProperties(
@@ -66,17 +66,17 @@ class DefaultConsumerTest extends TestKit(ActorSystem("test-system"))
       1)
     expectMsg(AmqpConsumerResponse("Camembert"))
   }
-  
+
   it should "return nothing if no sender is specified" in new AkkaConsumerFixture {
     consumer ! AmqpConsumerRequest("boo!", None)
-    
+
     consumer ! AmqpQueueMessageWithProperties(
       "Cowers in fear!",
       MessageProperties(
         correlationId = someCorrelationId,
         replyTo = "nowhere"),
       1)
-    
+
     expectNoMsg(100.millis) // timeout is enough since consumer is synchronous
   }
 
@@ -93,6 +93,21 @@ class DefaultConsumerTest extends TestKit(ActorSystem("test-system"))
       MockitoMatchers.any(classOf[ExecutionContext]),
       MockitoMatchers.any(classOf[ActorRef])
     )
+  }
+
+  it should "schedule a time-out message before publishing the message" in new AkkaConsumerFixture {
+    private val consumerWithTimeOut: TestActorRef[DefaultConsumer] = consumerWithTimeOut(100.millis)
+
+    private val inOrder = Mockito.inOrder(scheduler, channel)
+
+    consumerWithTimeOut ! AmqpConsumerRequest("request cheese", Some(self))
+
+    inOrder.verify (scheduler).scheduleOnce(MockitoMatchers.any(), MockitoMatchers.any(), MockitoMatchers.any())(MockitoMatchers.any(), MockitoMatchers.any())
+
+    inOrder.verify (channel).basicPublish(MockitoMatchers.any(),
+      MockitoMatchers.any(),
+      MockitoMatchers.any(),
+      MockitoMatchers.any())
   }
 
   it should "not schedule a time-out message if the time-out is infinite" in new AkkaConsumerFixture {
